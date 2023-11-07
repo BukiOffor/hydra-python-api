@@ -1,4 +1,5 @@
 import iop_python as iop
 
 seedPhrase = iop.generate_phrase()
-print(seedPhrase)
+wallet = iop.get_wallet(seedPhrase)
+print(wallet)

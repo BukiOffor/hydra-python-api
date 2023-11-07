@@ -28,7 +28,7 @@ pub fn send_tx(
 pub fn generate_phrase() ->PyResult<String>{
     let bip = Bip39::new();
     let phrase = bip.generate().as_phrase().to_owned();
-    println!("{}", phrase);
+    //println!("{}", phrase);
     Ok(phrase)
 }
 
