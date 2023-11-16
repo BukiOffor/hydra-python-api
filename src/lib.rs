@@ -1,18 +1,34 @@
-use std::{error::Error, fmt::Display};
+use std::{error::Error, fmt::Display,sync::mpsc};
 use async_std::task;
+use iop_sdk::hydra::TransactionData;
 use serde::{Deserialize, Serialize};
-
-
-
-
-use reqwest::{get, Url};
-
-
-
+use iop_sdk::vault::{hydra::HydraSigner, Networks};
+use reqwest::{get,Client,Url};
 use pyo3::prelude::*;
 use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
-use iop_sdk::hydra::txtype::{OptionalTransactionFields,CommonTransactionFields};
-use iop_sdk::hydra::txtype::{Aip29Transaction,hyd_core::Transaction};
+use iop_sdk::hydra::txtype::{
+    OptionalTransactionFields,CommonTransactionFields,
+    Aip29Transaction,hyd_core::Transaction
+};
+//use iop_sdk::ciphersuite::secp256k1::Secp256k1;
+//use std::marker::{Send,Sync};
+
+// struct MyType(&'static dyn Network<Suite = Secp256k1 > );
+
+// impl MyType {
+//     fn new(network: &'static dyn Network<Suite = Secp256k1>) -> Self{
+//         Self(network)
+//     }
+
+//     fn network( &self, name: &str) -> & dyn Network<Suite = Secp256k1> 
+//     {
+//         let n = Networks::by_name(name).unwrap();
+//         n 
+//     }
+// }
+
+// unsafe impl Sync for MyType{}
+
 #[derive(Debug)]
 pub enum Err{
     CouldNotSendTrsansaction
@@ -26,6 +42,8 @@ pub struct Data {
     isDelegate:bool,
     isResigned:bool
     }
+
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {data: Data}
@@ -55,14 +73,45 @@ pub fn send_tx(
 
 }
 #[allow(unused_variables)]
-pub async fn send_transaction(phrase:String,receiver:&str,amount:u64) -> Result<String, Box< dyn Error>>{
-    //let (signer,public_key, key_id) = get_keys(phrase).unwrap();
-    let signer = get_keys(phrase).unwrap();
-    let recipient_id = SecpKeyId::from_p2pkh_addr(receiver, &hyd::Testnet).unwrap();
+pub async fn send_transaction(signed:TransactionData) -> Result<String, Box< dyn Error>>{
+  
+    let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/transactions")?;
+    let response = Client::new()
+        .post(url)
+        .json(&signed)
+        .send()
+        .await?;
+    let result: String = response.text().await?;
+    Ok(result)
 
-    Err(Box::new(Err::CouldNotSendTrsansaction))
 }
-async fn get_wallet_data<'a>(addr:String ){ 
+
+
+#[allow(unused_variables)]
+pub async fn generate_transaction(phrase:String,receiver:String,amount:u64,nonce:u64,
+) -> Result<TransactionData,()>{
+    //let (signer,public_key, key_id) = get_keys(phrase).unwrap();
+    let wallet_phrase = phrase.clone();
+    let signer = get_keys(phrase).unwrap();
+    let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
+    //let wallet_data = get_wallet_data(wallet_phrase).await.unwrap();
+    //let mut nonce = wallet_data.data.nonce.parse::<u64>()?;
+    let nonce = nonce + 1;
+    let optional = OptionalTransactionFields{amount, manual_fee:None,vendor_field:None};
+    let common_fields = CommonTransactionFields{
+        network:&hyd::Testnet,
+        sender_public_key: signer.1,
+        nonce,
+        optional
+    };
+    let unsigned = Transaction::transfer(common_fields, &recipient_id);
+    let mut signed = unsigned.to_data();
+    signer.0.sign_hydra_transaction(&mut signed).unwrap();
+    Ok(signed)
+    
+}
+async fn _get_wallet_data(addr:String)->Result<Response,()> { 
+    let (tx, rx) = mpsc::channel();
     task::spawn(async move {
     let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/")
         .unwrap()
@@ -72,10 +121,12 @@ async fn get_wallet_data<'a>(addr:String ){
         let body = response.text().await.unwrap();
         let input = format!(r#"{body}"#);
         let object: Response = serde_json::from_str(&input).unwrap();
-        let address = object.data.address;        
-        println!("Response body: {}", address);
+        tx.send(object).unwrap();
+
     }
-}).await; 
+    }).await; 
+    let result = rx.recv().unwrap();
+    Ok(result)
     
 } 
 
@@ -97,9 +148,9 @@ pub fn get_wallet(phrase: String) -> PyResult<String> {
     let wallet_address = wallet.public()
         .expect("ERROR while unwrapping public key")
         .key_mut(0).expect("Error while getting wallet Address").to_p2pkh_addr();
-
     Ok(wallet_address)
 }
+
 #[pyfunction]
 #[allow(unused_variables)]
 pub fn get_ark_wallet(phrase:String) -> PyResult<String> {
@@ -110,7 +161,6 @@ pub fn get_ark_wallet(phrase:String) -> PyResult<String> {
     let ark_address = ark_key_id.to_p2pkh_addr(network.p2pkh_addr());
     Ok(ark_address)
 }
-
 
 fn get_keys(phrase: String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
     let mut vault = Vault::create(None, phrase, "password", "password").expect("Vault could not be initialised");
@@ -129,13 +179,14 @@ fn get_keys(phrase: String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),(
 
 
 #[pyfunction]
-pub fn call_wallet(py: Python, addr:String) -> PyResult<&PyAny> {
+pub fn call_wallet(py: Python, phrase: String,receiver:String,amount:u64, nonce:u64) -> PyResult<&PyAny> {
+    let _network = Networks::by_name("testnet").unwrap();
+    let signed = generate_transaction(phrase, receiver, amount, nonce);
     pyo3_asyncio::async_std::future_into_py(py, async move {
-        get_wallet_data(addr).await;
-        Ok(())
+        let res = send_transaction(signed.await.unwrap()).await.unwrap();
+        Ok(res)
     })
 }
-
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -144,9 +195,5 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(get_ark_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(call_wallet, m)?)?;
-
-    
-
-
     Ok(())
 }
