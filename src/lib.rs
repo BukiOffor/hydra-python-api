@@ -55,6 +55,11 @@ impl Display for Err{
 }
 impl Error for Err{}
 
+#[derive(Serialize, Debug)]
+struct SendTxnsReq<'a> {
+    transactions: Vec<&'a TransactionData>,
+}
+
 #[allow(unused_variables)]
 pub fn send_tx(
     amount: u64, manual_fee:Option<u64>, vendor_field:Option<String>, nonce:u64,
@@ -73,12 +78,14 @@ pub fn send_tx(
 
 }
 #[allow(unused_variables)]
-pub async fn send_transaction(signed:TransactionData) -> Result<String, Box< dyn Error>>{
+pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box< dyn Error>>{
   
     let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/transactions")?;
+    let mut transactions = Vec::new();
+    signed.iter().for_each(|i| transactions.push(i));
     let response = Client::new()
         .post(url)
-        .json(&signed)
+        .json(&SendTxnsReq { transactions })
         .send()
         .await?;
     let result: String = response.text().await?;
@@ -88,15 +95,16 @@ pub async fn send_transaction(signed:TransactionData) -> Result<String, Box< dyn
 
 
 #[allow(unused_variables)]
-pub async fn generate_transaction(phrase:String,receiver:String,amount:u64,nonce:u64,
-) -> Result<TransactionData,()>{
+pub async fn generate_transaction<'a>(phrase:String,receiver:String,amount:u64,nonce:u64,
+) -> Result<Vec<TransactionData>,()>{
     //let (signer,public_key, key_id) = get_keys(phrase).unwrap();
+    let mut transactions = Vec::new();
     let wallet_phrase = phrase.clone();
     let signer = get_keys(phrase).unwrap();
     let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
     //let wallet_data = get_wallet_data(wallet_phrase).await.unwrap();
     //let mut nonce = wallet_data.data.nonce.parse::<u64>()?;
-    let nonce = nonce + 1;
+    let nonce = nonce +1 ;
     let optional = OptionalTransactionFields{amount, manual_fee:None,vendor_field:None};
     let common_fields = CommonTransactionFields{
         network:&hyd::Testnet,
@@ -107,7 +115,8 @@ pub async fn generate_transaction(phrase:String,receiver:String,amount:u64,nonce
     let unsigned = Transaction::transfer(common_fields, &recipient_id);
     let mut signed = unsigned.to_data();
     signer.0.sign_hydra_transaction(&mut signed).unwrap();
-    Ok(signed)
+    transactions.push(signed);
+    Ok(transactions)
     
 }
 async fn _get_wallet_data(addr:String)->Result<Response,()> { 
@@ -179,11 +188,12 @@ fn get_keys(phrase: String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),(
 
 
 #[pyfunction]
-pub fn call_wallet(py: Python, phrase: String,receiver:String,amount:u64, nonce:u64) -> PyResult<&PyAny> {
-    let _network = Networks::by_name("testnet").unwrap();
+pub fn send_transaction_with_python(py: Python, phrase: String,receiver:String,amount:u64, nonce:u64) -> PyResult<&PyAny> {
+    //let _network = Networks::by_name("testnet").unwrap();
     let signed = generate_transaction(phrase, receiver, amount, nonce);
     pyo3_asyncio::async_std::future_into_py(py, async move {
         let res = send_transaction(signed.await.unwrap()).await.unwrap();
+        println!("{res}");
         Ok(res)
     })
 }
@@ -194,6 +204,6 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_phrase, m)?)?;
     m.add_function(wrap_pyfunction!(get_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(get_ark_wallet, m)?)?;
-    m.add_function(wrap_pyfunction!(call_wallet, m)?)?;
+    m.add_function(wrap_pyfunction!(send_transaction_with_python, m)?)?;
     Ok(())
 }
