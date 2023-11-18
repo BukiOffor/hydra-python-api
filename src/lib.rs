@@ -2,7 +2,7 @@ use std::{error::Error, fmt::Display,sync::mpsc};
 use async_std::task;
 use iop_sdk::hydra::TransactionData;
 use serde::{Deserialize, Serialize};
-use iop_sdk::vault::{hydra::HydraSigner, Networks};
+use iop_sdk::vault::hydra::HydraSigner;
 use reqwest::{get,Client,Url};
 use pyo3::prelude::*;
 use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
@@ -10,6 +10,8 @@ use iop_sdk::hydra::txtype::{
     OptionalTransactionFields,CommonTransactionFields,
     Aip29Transaction,hyd_core::Transaction
 };
+//use iop_sdk::vault::Networks;
+
 //use iop_sdk::ciphersuite::secp256k1::Secp256k1;
 //use std::marker::{Send,Sync};
 
@@ -148,12 +150,12 @@ pub fn generate_phrase() ->PyResult<String>{
 
 #[pyfunction]
 #[allow(unused_variables)]
-pub fn get_wallet(phrase: String) -> PyResult<String> {
-    let mut vault = Vault::create(None, phrase, "password", "password").expect("Vault could not be initialised");
+pub fn get_wallet(phrase: String, password:String) -> PyResult<String> {
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
     let params = hydra::Parameters::new(&hyd::Testnet,0);
-    hydra::Plugin::init(&mut vault, "password", &params).expect("plugin could not be initialised");
+    hydra::Plugin::init(&mut vault, &password, &params).expect("plugin could not be initialised");
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be initialized");
-    let wallet_private = wallet.private("password");
+    let wallet_private = wallet.private(&password);
     let wallet_address = wallet.public()
         .expect("ERROR while unwrapping public key")
         .key_mut(0).expect("Error while getting wallet Address").to_p2pkh_addr();
