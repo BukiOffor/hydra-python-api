@@ -35,7 +35,8 @@ from hydra import HydraWallet
 The `HydraWallet` contains methods that can be used to interacts with the chain, once instanciated with a seed phrase.
 
 ```python
-myWallet = HydraWallet("blind market ability .....")
+password = "password"
+myWallet = HydraWallet("blind market ability .....", password)
 ```
 Then you can perform certain transactions like transferring tokens and checking the transaction status on the blockchain.
 
