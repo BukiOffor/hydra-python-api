@@ -80,8 +80,7 @@ pub fn send_tx(
 
 }
 #[allow(unused_variables)]
-pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box< dyn Error>>{
-  
+pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box< dyn Error>>{ 
     let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/transactions")?;
     let mut transactions = Vec::new();
     signed.iter().for_each(|i| transactions.push(i));
@@ -99,13 +98,10 @@ pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box
 #[allow(unused_variables)]
 pub async fn generate_transaction<'a>(phrase:String,receiver:String,amount:u64,nonce:u64,
 ) -> Result<Vec<TransactionData>,()>{
-    //let (signer,public_key, key_id) = get_keys(phrase).unwrap();
     let mut transactions = Vec::new();
     let wallet_phrase = phrase.clone();
     let signer = get_keys(phrase).unwrap();
     let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
-    //let wallet_data = get_wallet_data(wallet_phrase).await.unwrap();
-    //let mut nonce = wallet_data.data.nonce.parse::<u64>()?;
     let nonce = nonce +1 ;
     let optional = OptionalTransactionFields{amount, manual_fee:None,vendor_field:None};
     let common_fields = CommonTransactionFields{

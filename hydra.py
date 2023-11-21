@@ -49,13 +49,10 @@ class HydraWallet:
         blockId = response['data']['blockId']
         fee = response['data']['fee']
         confirmations = response['data']['confirmations']
-        time = response['data']['timestamp']          
+        time = response['data']['timestamp']['human']          
         return f"Transaction with id {txid} was sent successfully at {time} with a fee of {fee} Hyd and has {confirmations} confirmations"
 
         
-    def generate_wallet(self, unlock_password):
-        pass
-
     def display_address_balance(self):
         addr = self.get_wallet_address()
         response = requests.get(f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}")
@@ -68,7 +65,6 @@ class HydraWallet:
 
         
 
-
 class HydraChain:
 
     def __init__(self) -> None:
@@ -77,6 +73,9 @@ class HydraChain:
     def generate_phrase():
         phrase = iop.generate_phrase()
         return phrase
+    
+    def generate_wallet(self, unlock_password):
+        pass
 
 
 
@@ -93,7 +92,6 @@ class HydraChain:
 
 
 
-main_wallet = "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather scan"
 
 
 
