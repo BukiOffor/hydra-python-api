@@ -20,30 +20,35 @@ class HydraWallet:
         response = await iop.send_transaction_with_python(phrase,receiver,amount,nonce,password)
         return response
     
-    #this function assumes that the wallet has made a transaction before
-    async def send_transaction(self,receiver,amount):
+    def get_nonce(self):
         addr = self.get_wallet_address()
         url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}"
-        # Send a GET request to the URL
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
             nonce = int(data['data']['nonce'])
-            #balance = data['data']['balance']
-            response = asyncio.run(self.send_tx(self.phrase,receiver,amount,nonce,self.phrase))
-            res = json.loads(response)
-            if len(res['data']['accept']) > 0:
-                txhash = res['data']['accept'][0]
-                return txhash
-            else:
-                print("Your transaction was not successfull")
-                sys.exit()
+            return nonce
         else:
-            print("Failed to fetch data. Status code:", response.status_code)       
+            print("Failed to fetch data. Status code:", response.status_code)   
+
+    def sign_transaction(self,receiver,amount):
+        nonce = self.get_nonce()
+        response = iop.generate_transaction(self.phrase,receiver,amount,nonce,self.password)
+        signed_txs = json.loads(response)
+        return signed_txs    
+
+    #this function assumes that the wallet has made a transaction before
+    def send_transaction(self,receiver,amount):
+        # Send a GET request to the URL
+        signed_txs = self.sign_transaction(receiver,amount)
+        url = "https://test.explorer.hydraledger.io:4705/api/v2/transactions"
+        res = requests.post(url, json=signed_txs)
+        response = res.json()
+        return response
 
 
-    def check_transaction(txhash):
-        url = "https://test.explorer.hydraledger.io:4705/api/v2/transactions/{txhash}"
+    def check_transaction(self,txhash):
+        url = f"https://test.explorer.hydraledger.io:4705/api/v2/transactions/{txhash}"
         res = requests.get(url)
         response = res.json()
         txid = response['data']['id']

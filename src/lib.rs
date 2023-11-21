@@ -1,15 +1,15 @@
-use std::{error::Error, fmt::Display,sync::mpsc};
-use async_std::task;
+use std::{error::Error, fmt::Display};
 use iop_sdk::hydra::TransactionData;
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
-use reqwest::{get,Client,Url};
+use reqwest::{Client,Url};
 use pyo3::prelude::*;
 use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
 use iop_sdk::hydra::txtype::{
     OptionalTransactionFields,CommonTransactionFields,
     Aip29Transaction,hyd_core::Transaction
 };
+
 //use iop_sdk::vault::Networks;
 
 //use iop_sdk::ciphersuite::secp256k1::Secp256k1;
@@ -31,6 +31,17 @@ use iop_sdk::hydra::txtype::{
 
 // unsafe impl Sync for MyType{}
 
+
+//use pyo3::impl_::wrap::OkWrap;
+
+
+// impl  OkWrap<Err> for Transactions {
+//     type Error = Err;
+//     fn wrap(self, py: Python<'_>) -> Result<Py<PyAny>, Self::Error> {
+//         Ok(self.transactions)
+//     }
+// }
+
 #[derive(Debug)]
 pub enum Err{
     CouldNotSendTrsansaction
@@ -50,7 +61,13 @@ pub struct Data {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {data: Data}
 
-impl Display for Err{
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Transactions {
+    transactions: Vec<TransactionData>
+}
+
+
+impl Display for Err {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
@@ -62,23 +79,7 @@ struct SendTxnsReq<'a> {
     transactions: Vec<&'a TransactionData>,
 }
 
-#[allow(unused_variables)]
-pub fn send_tx(
-    amount: u64, manual_fee:Option<u64>, vendor_field:Option<String>, nonce:u64,
-    sender_public_key:SecpPublicKey,recipient_id:&SecpKeyId
-)->PyResult<String>{
-    let optional = OptionalTransactionFields{amount, manual_fee,vendor_field};
-    let common_fields = CommonTransactionFields{
-        network: &hyd::Testnet,
-        sender_public_key,
-        nonce,
-        optional
-    };
-    let transfer = Transaction::transfer(common_fields, recipient_id);
-    let res = &transfer.to_data();
-    Ok(res.get_id().expect("Something went wrong with the transaction"))
 
-}
 #[allow(unused_variables)]
 pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box< dyn Error>>{ 
     let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/transactions")?;
@@ -94,11 +95,11 @@ pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box
 
 }
 
-
+#[pyfunction]
 #[allow(unused_variables)]
-pub async fn generate_transaction<'a>(
+pub fn generate_transaction<'a>(
     phrase:String,receiver:String,amount:u64,nonce:u64,password:String
-) -> Result<Vec<TransactionData>,()>{
+) -> PyResult<String>{
     let mut transactions = Vec::new();
     let wallet_phrase = phrase.clone();
     let signer = get_keys(phrase,password).unwrap();
@@ -115,28 +116,9 @@ pub async fn generate_transaction<'a>(
     let mut signed = unsigned.to_data();
     signer.0.sign_hydra_transaction(&mut signed).unwrap();
     transactions.push(signed);
-    Ok(transactions)
-    
+    let data = serde_json::to_string(&Transactions{transactions}).unwrap();
+    Ok(data)    
 }
-async fn _get_wallet_data(addr:String)->Result<Response,()> { 
-    let (tx, rx) = mpsc::channel();
-    task::spawn(async move {
-    let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/")
-        .unwrap()
-        .join(&format!("wallets/{addr}")).unwrap();
-    let response = get(url).await.unwrap();
-    if response.status().is_success(){
-        let body = response.text().await.unwrap();
-        let input = format!(r#"{body}"#);
-        let object: Response = serde_json::from_str(&input).unwrap();
-        tx.send(object).unwrap();
-
-    }
-    }).await; 
-    let result = rx.recv().unwrap();
-    Ok(result)
-    
-} 
 
 #[pyfunction]
 pub fn generate_phrase() ->PyResult<String>{
@@ -186,16 +168,7 @@ fn get_keys(phrase: String, password:String) -> Result<(SecpPrivateKey,SecpPubli
 
 
 
-#[pyfunction]
-pub fn send_transaction_with_python(py: Python, phrase: String,receiver:String,amount:u64, nonce:u64, password:String) -> PyResult<&PyAny> {
-    //let _network = Networks::by_name("testnet").unwrap();
-    let signed = generate_transaction(phrase, receiver, amount, nonce,password);
-    pyo3_asyncio::async_std::future_into_py(py, async move {
-        let res = send_transaction(signed.await.unwrap()).await.unwrap();
-        println!("{res}");
-        Ok(res)
-    })
-}
+
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -203,6 +176,7 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_phrase, m)?)?;
     m.add_function(wrap_pyfunction!(get_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(get_ark_wallet, m)?)?;
-    m.add_function(wrap_pyfunction!(send_transaction_with_python, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_transaction, m)?)?;
+
     Ok(())
 }
