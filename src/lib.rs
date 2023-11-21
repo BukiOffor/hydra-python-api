@@ -96,11 +96,12 @@ pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box
 
 
 #[allow(unused_variables)]
-pub async fn generate_transaction<'a>(phrase:String,receiver:String,amount:u64,nonce:u64,
+pub async fn generate_transaction<'a>(
+    phrase:String,receiver:String,amount:u64,nonce:u64,password:String
 ) -> Result<Vec<TransactionData>,()>{
     let mut transactions = Vec::new();
     let wallet_phrase = phrase.clone();
-    let signer = get_keys(phrase).unwrap();
+    let signer = get_keys(phrase,password).unwrap();
     let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
     let nonce = nonce +1 ;
     let optional = OptionalTransactionFields{amount, manual_fee:None,vendor_field:None};
@@ -169,12 +170,12 @@ pub fn get_ark_wallet(phrase:String) -> PyResult<String> {
     Ok(ark_address)
 }
 
-fn get_keys(phrase: String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
-    let mut vault = Vault::create(None, phrase, "password", "password").expect("Vault could not be initialised");
+fn get_keys(phrase: String, password:String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
     let params = hydra::Parameters::new(&hyd::Testnet,0);
-    hydra::Plugin::init(&mut vault, "password", &params).expect("plugin could not be initialised");
+    hydra::Plugin::init(&mut vault, &password, &params).expect("plugin could not be initialised");
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be initialized");
-    let wallet_private = wallet.private("password")
+    let wallet_private = wallet.private(&password)
         .expect("private struct could not be unwrapped")
         .key(0)
         .expect("private key could not be unwrapped").to_private_key();  
@@ -186,9 +187,9 @@ fn get_keys(phrase: String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),(
 
 
 #[pyfunction]
-pub fn send_transaction_with_python(py: Python, phrase: String,receiver:String,amount:u64, nonce:u64) -> PyResult<&PyAny> {
+pub fn send_transaction_with_python(py: Python, phrase: String,receiver:String,amount:u64, nonce:u64, password:String) -> PyResult<&PyAny> {
     //let _network = Networks::by_name("testnet").unwrap();
-    let signed = generate_transaction(phrase, receiver, amount, nonce);
+    let signed = generate_transaction(phrase, receiver, amount, nonce,password);
     pyo3_asyncio::async_std::future_into_py(py, async move {
         let res = send_transaction(signed.await.unwrap()).await.unwrap();
         println!("{res}");

@@ -7,16 +7,17 @@ import sys
 
 class HydraWallet:
 
-    def __init__(self,phrase):
+    def __init__(self,phrase,password):
         self.phrase = phrase
+        self.password = password
    
     
-    def get_wallet_address(self,password):
-        addr = iop.get_wallet(self.phrase,password)
+    def get_wallet_address(self):
+        addr = iop.get_wallet(self.phrase,self.password)
         return addr
     
-    async def send_tx(phrase,receiver,amount, nonce):
-        response = await iop.send_transaction_with_python(phrase,receiver,amount,nonce)
+    async def send_tx(phrase, receiver, amount, nonce, password):
+        response = await iop.send_transaction_with_python(phrase,receiver,amount,nonce,password)
         return response
     
     #this function assumes that the wallet has made a transaction before
@@ -29,7 +30,7 @@ class HydraWallet:
             data = response.json()  # Assuming the response is in JSON format
             nonce = int(data['data']['nonce'])
             #balance = data['data']['balance']
-            response = asyncio.run(self.send_tx(self.phrase,receiver,amount,nonce))
+            response = asyncio.run(self.send_tx(self.phrase,receiver,amount,nonce,self.phrase))
             res = json.loads(response)
             if len(res['data']['accept']) > 0:
                 txhash = res['data']['accept'][0]
