@@ -2,7 +2,6 @@ use std::{error::Error, fmt::Display};
 use iop_sdk::hydra::TransactionData;
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
-use reqwest::{Client,Url};
 use pyo3::prelude::*;
 use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
 use iop_sdk::hydra::txtype::{
@@ -80,21 +79,6 @@ struct SendTxnsReq<'a> {
 }
 
 
-#[allow(unused_variables)]
-pub async fn send_transaction(signed:Vec<TransactionData>) -> Result<String, Box< dyn Error>>{ 
-    let url = Url::parse("https://test.explorer.hydraledger.io:4705/api/v2/transactions")?;
-    let mut transactions = Vec::new();
-    signed.iter().for_each(|i| transactions.push(i));
-    let response = Client::new()
-        .post(url)
-        .json(&SendTxnsReq { transactions })
-        .send()
-        .await?;
-    let result: String = response.text().await?;
-    Ok(result)
-
-}
-
 #[pyfunction]
 #[allow(unused_variables)]
 pub fn generate_transaction<'a>(
@@ -165,9 +149,6 @@ fn get_keys(phrase: String, password:String) -> Result<(SecpPrivateKey,SecpPubli
     let wallet_key_id = wallet.public().unwrap().key(0).unwrap().to_key_id();
     Ok((wallet_private,wallet_public,wallet_key_id))
 }
-
-
-
 
 
 /// A Python module implemented in Rust.
