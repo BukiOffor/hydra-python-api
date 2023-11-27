@@ -1,5 +1,5 @@
 use std::{error::Error, fmt::Display};
-use iop_sdk::hydra::TransactionData;
+use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner};
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
 use pyo3::prelude::*;
@@ -9,37 +9,52 @@ use iop_sdk::hydra::txtype::{
     Aip29Transaction,hyd_core::Transaction
 };
 
-//use iop_sdk::vault::Networks;
-
-//use iop_sdk::ciphersuite::secp256k1::Secp256k1;
-//use std::marker::{Send,Sync};
-
-// struct MyType(&'static dyn Network<Suite = Secp256k1 > );
-
-// impl MyType {
-//     fn new(network: &'static dyn Network<Suite = Secp256k1>) -> Self{
-//         Self(network)
-//     }
-
-//     fn network( &self, name: &str) -> & dyn Network<Suite = Secp256k1> 
-//     {
-//         let n = Networks::by_name(name).unwrap();
-//         n 
-//     }
-// }
-
-// unsafe impl Sync for MyType{}
+use iop_sdk::vault::morpheus;
+use iop_sdk::multicipher::MKeyId;
+use iop_sdk::morpheus::data::Did;
+use iop_sdk::morpheus::crypto::sign::PrivateKeySigner;
+use iop_sdk::vault::PublicKey;
 
 
-//use pyo3::impl_::wrap::OkWrap;
+#[pyfunction]
+pub fn generate_did_by_secp_key_id(phrase: String,password:String) ->PyResult<String>{
+    let keys = get_keys(phrase, password).unwrap();
+    let m_key = MKeyId::from(keys.2);
+    let did = Did::new(m_key);
+    let k = did.to_string();
+    Ok(k)
+}
+
+#[pyfunction]
+pub fn sign_did_statement(phrase: String,password:String, data: &[u8]) ->PyResult<(String,String)>{
+    let v_password = password.clone();
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+    morpheus::Plugin::init(&mut vault, v_password).unwrap();
+    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
+    let private_key = morpheus_plugin.private(password).unwrap()
+        .resources().unwrap().key(0)
+        .unwrap().private_key();
+    let signer = PrivateKeySigner::new(private_key);
+    let response = signer.sign(data).unwrap();
+    let kpub = response.0;
+    let signed_data = response.1;
+    Ok((signed_data.to_string(),kpub.to_string()))
+}
+
+#[pyfunction]
+pub fn generate_did_by_morpheus(phrase: String,password:String) ->PyResult<String>{
+    let v_password = password.clone();
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+    morpheus::Plugin::init(&mut vault, v_password).unwrap();
+    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
+    let pk = morpheus_plugin.private(password).unwrap();
+    let kpub = morpheus_plugin.public().unwrap().personas().unwrap().key(0).unwrap();
+    let persona = pk.key_by_pk(&kpub).unwrap();
+    let did = Did::from(persona.neuter().public_key().key_id());    
+    Ok(did.to_string())
+}
 
 
-// impl  OkWrap<Err> for Transactions {
-//     type Error = Err;
-//     fn wrap(self, py: Python<'_>) -> Result<Py<PyAny>, Self::Error> {
-//         Ok(self.transactions)
-//     }
-// }
 
 #[derive(Debug)]
 pub enum Err{
@@ -167,6 +182,10 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_ark_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(generate_transaction, m)?)?;
     m.add_function(wrap_pyfunction!(get_public_key, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_did_by_morpheus, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_did_by_secp_key_id, m)?)?;
+    m.add_function(wrap_pyfunction!(sign_did_statement, m)?)?;
+
 
 
     Ok(())

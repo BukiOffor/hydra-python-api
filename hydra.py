@@ -2,6 +2,72 @@ import iop_python as iop
 import requests
 import json
 import os
+import shutil
+
+
+
+
+
+# ---------------------------------------MileStone 2-----------------------------------------------------
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# -------------------------------------------------------------------------------------------------------
+
+
+class HydraChain:
+
+    home_directory = os.path.expanduser("~")
+    file_path = home_directory+"/.hydra_wallet"
+    
+    def __init__() -> None:
+        pass
+    
+    def generate_wallet(password):
+        phrase = iop.generate_phrase()
+        public_key = iop.get_public_key(phrase, password)
+        vault = {
+            "phrase": phrase,
+            "password": password,
+            "public_key": public_key
+        }
+        vault = json.dumps(vault)
+        home_directory = os.path.expanduser("~")
+        f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
+        os.close (f1)
+        with open(home_directory+'/.hydra_wallet', 'w') as file:
+            file.write(vault+"\n")
+        file.close()
+
+    @classmethod
+    def generate_did(cls):
+        with open(cls.file_path, 'r') as file:
+            file_content = file.read()
+        vault = json.loads(file_content)
+        phrase, password = vault['phrase'],vault['password']
+        did = iop.generate_did_by_mkey(phrase, password)
+        did1 = iop.generate_did(phrase, password)
+        print(did)
+        print(did1)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -71,35 +137,7 @@ class HydraWallet:
 
 
 
-# ---------------------------------------MileStone 2-----------------------------------------------------
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# |                                                                                                     |
-# -------------------------------------------------------------------------------------------------------
-
-
-class HydraChain:
-
-    def __init__(self) -> None:
-        pass
-    def generate_wallet(password):
-        phrase = iop.generate_phrase()
-        public_key = iop.get_public_key(phrase, password)
-        vault = {
-            "phrase": phrase,
-            "password": password,
-            "public_key": public_key
-        }
+# 
 
     
    
