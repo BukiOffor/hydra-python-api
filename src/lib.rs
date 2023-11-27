@@ -85,7 +85,6 @@ pub fn generate_transaction<'a>(
     phrase:String,receiver:String,amount:u64,nonce:u64,password:String
 ) -> PyResult<String>{
     let mut transactions = Vec::new();
-    let wallet_phrase = phrase.clone();
     let signer = get_keys(phrase,password).unwrap();
     let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
     let nonce = nonce +1 ;
@@ -135,7 +134,6 @@ pub fn get_ark_wallet(phrase:String) -> PyResult<String> {
     let ark_address = ark_key_id.to_p2pkh_addr(network.p2pkh_addr());
     Ok(ark_address)
 }
-
 fn get_keys(phrase: String, password:String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
     let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
     let params = hydra::Parameters::new(&hyd::Testnet,0);
@@ -150,6 +148,16 @@ fn get_keys(phrase: String, password:String) -> Result<(SecpPrivateKey,SecpPubli
     Ok((wallet_private,wallet_public,wallet_key_id))
 }
 
+#[pyfunction]
+pub fn get_public_key(phrase: String, password:String) -> PyResult<String> {
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+    let params = hydra::Parameters::new(&hyd::Testnet,0);
+    hydra::Plugin::init(&mut vault, &password, &params).expect("plugin could not be initialised");
+    let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be initialized");
+    let  wallet_public = wallet.public().unwrap().key(0).unwrap().to_public_key().to_string(); 
+    Ok(wallet_public)
+}
+
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -158,6 +166,8 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(get_ark_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(generate_transaction, m)?)?;
+    m.add_function(wrap_pyfunction!(get_public_key, m)?)?;
+
 
     Ok(())
 }

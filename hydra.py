@@ -1,8 +1,8 @@
 import iop_python as iop
-import asyncio
 import requests
 import json
-import sys
+import os
+
 
 
 class HydraWallet:
@@ -69,19 +69,40 @@ class HydraWallet:
         else:
             print("Failed to fetch data. Status code:", response.status_code)  
 
-        
+
+
+# ---------------------------------------MileStone 2-----------------------------------------------------
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# |                                                                                                     |
+# -------------------------------------------------------------------------------------------------------
+
 
 class HydraChain:
 
     def __init__(self) -> None:
         pass
-
-    def generate_phrase():
+    def generate_wallet(password):
         phrase = iop.generate_phrase()
-        return phrase
+        public_key = iop.get_public_key(phrase, password)
+        vault = {
+            "phrase": phrase,
+            "password": password,
+            "public_key": public_key
+        }
+
     
-    def generate_wallet(self, unlock_password):
-        pass
+   
 
 
 
