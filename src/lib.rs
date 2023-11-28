@@ -73,7 +73,7 @@ pub fn sign_did_statement(phrase: String,password:String, data: &[u8]) ->PyResul
 }
 
 #[pyfunction]
-pub fn sign_witness_statement(phrase: String,password:String,data: &str){
+pub fn sign_witness_statement(phrase: String,password:String,data: &str)->PyResult<String>{
     let v_password = password.clone();
     let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
     morpheus::Plugin::init(&mut vault, v_password).unwrap();
@@ -84,7 +84,9 @@ pub fn sign_witness_statement(phrase: String,password:String,data: &str){
     let signer = PrivateKeySigner::new(private_key);
     let statement = get_witness_statement(data).unwrap();
     let response = signer.sign_witness_statement(statement).unwrap();
-    println!("{response:?}")
+    let data = serde_json::to_string(&response).unwrap();
+    Ok(data)
+
 }
 
 //=================================================MILE STONE TWO ENDS HERE==========================================================
