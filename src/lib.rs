@@ -2,18 +2,70 @@ use std::{error::Error, fmt::Display};
 use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner};
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::PyDict};
 use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
 use iop_sdk::hydra::txtype::{
     OptionalTransactionFields,CommonTransactionFields,
     Aip29Transaction,hyd_core::Transaction
 };
 
+
+use serde_json::Value;
 use iop_sdk::vault::morpheus;
 use iop_sdk::multicipher::MKeyId;
 use iop_sdk::morpheus::data::Did;
 use iop_sdk::morpheus::crypto::sign::PrivateKeySigner;
 use iop_sdk::vault::PublicKey;
+use iop_sdk::morpheus::data::{WitnessStatement, Claim, Constraints};
+use iop_sdk::json_digest::Nonce264;
+
+
+
+
+#[pyfunction]
+#[allow(unused_variables)]
+pub fn clean_data(data: &str)->PyResult<()>{
+    // let process_id = data.get_item("process_id").unwrap().unwrap().to_string();
+    // let claim = data.get_item("claim").unwrap().unwrap();
+    // let constraints = data.get_item("constraints").unwrap().unwrap();
+    // let nonce = Nonce264(data.get_item("nonce").unwrap().unwrap().to_string());
+    // // <-----------------Constraints--------------------->
+    // let after:Option<String> = constraints.get_item("after").unwrap().to_string().into();
+    // let before:Option<String> = constraints.get_item("before").unwrap().to_string().into();
+    // let witness = constraints.get_item("witness").unwrap().to_string();
+    // let did_str = constraints.get_item("authority").unwrap().to_string();
+
+    let data: Result<Value, serde_json::Error> = serde_json::from_str(data);
+    let data = data.expect("LLOL. U CANT BE SERIOUS");
+    let process_id = data.get("processId").unwrap().to_string();
+    let claim = data.get("claim").unwrap();
+    let constraints = data.get("constraints").unwrap();
+    let nonce = Nonce264(data.get("nonce").unwrap().to_string());
+    // // <-----------------Constraints--------------------->
+    // let after:Option<String> = constraints.get_item("after").unwrap().to_string().into();
+    // let before:Option<String> = constraints.get_item("before").unwrap().to_string().into();
+    // let witness = constraints.get_item("witness").unwrap().to_string();
+    // let did_str = constraints.get_item("authority").unwrap().to_string();
+    println!("{process_id}");
+    Ok(())
+
+}
+
+#[pyfunction]
+pub fn sign_witness_statement(phrase: String,password:String,_data: &PyDict){
+    let v_password = password.clone();
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+    morpheus::Plugin::init(&mut vault, v_password).unwrap();
+    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
+    let private_key = morpheus_plugin.private(password).unwrap()
+        .resources().unwrap().key(0)
+        .unwrap().private_key();
+    let _signer = PrivateKeySigner::new(private_key);
+  
+
+
+
+}
 
 
 #[pyfunction]
@@ -185,6 +237,8 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_did_by_morpheus, m)?)?;
     m.add_function(wrap_pyfunction!(generate_did_by_secp_key_id, m)?)?;
     m.add_function(wrap_pyfunction!(sign_did_statement, m)?)?;
+    m.add_function(wrap_pyfunction!(clean_data, m)?)?;
+
 
 
 

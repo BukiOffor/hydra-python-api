@@ -60,6 +60,8 @@ class HydraChain:
         print(did)
         print(did1)
 
+    def sign_statements(data):
+        iop.clean_data(data)
 
 
 
