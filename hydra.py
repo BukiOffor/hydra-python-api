@@ -2,7 +2,6 @@ import iop_python as iop
 import requests
 import json
 import os
-import shutil
 
 
 
@@ -67,8 +66,6 @@ class HydraChain:
         phrase, password = vault['phrase'],vault['password']
         data = json.dumps(data)
         iop.sign_witness_statement(phrase, password, data)
-
-
 
 
 
