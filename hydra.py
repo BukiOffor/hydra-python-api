@@ -65,10 +65,16 @@ class HydraChain:
         vault = json.loads(file_content)
         phrase, password = vault['phrase'],vault['password']
         data = json.dumps(data)
-        iop.sign_witness_statement(phrase, password, data)
+        signed_statement = iop.sign_witness_statement(phrase, password, data)
+        return signed_statement
 
+    def verify_signed_statement(signed_statement):
+        result = iop.verify_signed_statement(signed_statement)
+        return result
 
-
+    def generate_nonce():
+        nonce = iop.generate_nonce()
+        return nonce
 
 
 

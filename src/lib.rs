@@ -1,5 +1,5 @@
 use std::{error::Error, fmt::Display};
-use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner};
+use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner, json_digest::Nonce264};
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
 use pyo3::prelude::*;
@@ -15,9 +15,24 @@ use iop_sdk::morpheus::data::Did;
 use iop_sdk::morpheus::crypto::sign::PrivateKeySigner;
 use iop_sdk::vault::PublicKey;
 use iop_sdk::morpheus::data::WitnessStatement;
+use iop_sdk::morpheus::crypto::Signed;
+
 
 
 //=================================================MILE STONE TWO STARTS HERE==========================================================
+#[pyfunction]
+pub fn verify_signed_statement(data:&str)->PyResult<bool>{
+    let statement:Signed<WitnessStatement> = serde_json::from_str(data).unwrap(); 
+    let verified = statement.validate();
+    Ok(verified)
+} 
+
+#[pyfunction]
+pub fn generate_nonce()->PyResult<String>{
+    let nonce = Nonce264::generate().0; 
+    Ok(nonce)
+}
+
 
 #[pyfunction]
 pub fn generate_phrase() ->PyResult<String>{
@@ -217,6 +232,10 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_did_by_secp_key_id, m)?)?;
     m.add_function(wrap_pyfunction!(sign_did_statement, m)?)?;
     m.add_function(wrap_pyfunction!(sign_witness_statement, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_signed_statement, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_nonce, m)?)?;
+
+
 
 
     Ok(())
