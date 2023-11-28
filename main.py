@@ -1,6 +1,5 @@
 from hydra import HydraChain, HydraWallet
 import json
-
 #implement your logic here
 
 data = {
@@ -20,15 +19,20 @@ data = {
   },
   "processId": "cjuQR3pDJeaiRv9oCZ-fBE7T8QWpUGfjP40sAXq0bLwr-8",
   "constraints": {
-    "authority": "did:morpheus:ezTO_BE_DEFINED",
-    "content": None
+      "after": "",
+      "before": "",
+    "authority": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
+    "witness": "uVIc9J4UjKx8tRs6HUEDQElksBCtF9VnHb439boVmB9cw",
+    "content": ""
   },
   "nonce": "uB8K6EPgZkeP8FVK0tU9RWqBFw3JM2lTaZFhMUWcKY9nh",
 }
 
 data = json.dumps(data)
 
-phrase = HydraChain.sign_statements(data)
+
+phrase = HydraChain.sign_witness_statements(data)
 
 
 #print(phrase)
+

@@ -60,8 +60,14 @@ class HydraChain:
         print(did)
         print(did1)
 
-    def sign_statements(data):
-        iop.clean_data(data)
+    @classmethod
+    def sign_witness_statements(cls,data):
+        with open(cls.file_path, 'r') as file:
+            file_content = file.read()
+        vault = json.loads(file_content)
+        phrase, password = vault['phrase'],vault['password']
+        #data = json.dumps(data)
+        iop.sign_witness_statement(phrase, password, data)
 
 
 
