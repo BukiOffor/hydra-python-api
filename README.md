@@ -44,3 +44,31 @@ Then you can perform certain transactions like transferring tokens and checking 
 receiver = "taQb8gfnetDt6KtRH3n11M3APMzrWiBhhg"
 txHash = myWallet.send_transaction(receiver,"1000000")
 ```
+
+## Milestone Two
+### Using the DID persona on chain
+
+This milestone uses the `HydraChain` class from the hydra module to achieve its aim.
+
+To generate a 24 word phrase, we call the `generate_wallet()` method from our module. This function takes a password.
+```python
+import HydraChain
+password = "horse%staple-attack"
+HydraChain.generate_wallet(password)
+```
+The above code will generate a 24 word phrase and stores it in a `.hydra_wallet` file in the home directory with a permission of `077`. 
+
+To generate a persona did on chain, we use the method `generate_did()`. This function reads the `.hydra_wallet` file and generates a did persona with the seed phrase.
+
+```python
+did = HydraChain.generate_did()
+print(did)
+>>> did:morpheus:ez22Y8sKi9g18FU9ofVMbb2aD
+```
+
+To sign a witness statement, we use the `sign_witness_statements()` method. This method takes an object of the neccesary parameters and signs them using the users credential.
+
+```python
+data = {"python":"object"...}
+signed_statement = HydraChain.sign_witness_statements()
+```

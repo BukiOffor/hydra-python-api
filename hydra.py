@@ -55,10 +55,9 @@ class HydraChain:
             file_content = file.read()
         vault = json.loads(file_content)
         phrase, password = vault['phrase'],vault['password']
-        did = iop.generate_did_by_mkey(phrase, password)
-        did1 = iop.generate_did(phrase, password)
-        print(did)
-        print(did1)
+        _did = iop.generate_did_by_secp_key_id(phrase, password)
+        did = iop.generate_did_by_morpheus(phrase, password)
+        return(did)
 
     @classmethod
     def sign_witness_statements(cls,data):
@@ -66,10 +65,8 @@ class HydraChain:
             file_content = file.read()
         vault = json.loads(file_content)
         phrase, password = vault['phrase'],vault['password']
-        #data = json.dumps(data)
+        data = json.dumps(data)
         iop.sign_witness_statement(phrase, password, data)
-
-
 
 
 
@@ -145,7 +142,7 @@ class HydraWallet:
 
 
 
-# 
+ 
 
     
    

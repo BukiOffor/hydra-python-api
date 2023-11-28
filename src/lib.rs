@@ -17,36 +17,43 @@ use iop_sdk::vault::PublicKey;
 use iop_sdk::morpheus::data::WitnessStatement;
 
 
+//=================================================MILE STONE TWO STARTS HERE==========================================================
+
+#[pyfunction]
+pub fn generate_phrase() ->PyResult<String>{
+    let bip = Bip39::new();
+    let phrase = bip.generate().as_phrase().to_owned();
+    Ok(phrase)
+}
+
+#[pyfunction]
+pub fn generate_did_by_secp_key_id(phrase: String,password:String) ->PyResult<String>{
+    let keys: (SecpPrivateKey, SecpPublicKey, SecpKeyId) = get_keys(phrase, password).unwrap();
+    let m_key = MKeyId::from(keys.2);
+    let did = Did::new(m_key);
+    let key = did.to_string();
+    Ok(key)
+}
+
+
+
+#[pyfunction]
+pub fn generate_did_by_morpheus(phrase: String,password:String) ->PyResult<String>{
+    let v_password = password.clone();
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+    morpheus::Plugin::init(&mut vault, v_password).unwrap();
+    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
+    let pk = morpheus_plugin.private(password).unwrap();
+    let kpub = morpheus_plugin.public().unwrap().personas().unwrap().key(0).unwrap();
+    let persona = pk.key_by_pk(&kpub).unwrap();
+    let did = Did::from(persona.neuter().public_key().key_id());    
+    Ok(did.to_string())
+}
 
 #[allow(unused_variables)]
 pub fn get_witness_statement(data: &str)->Result<WitnessStatement,()>{
     let statement:WitnessStatement = serde_json::from_str(data).unwrap(); 
     Ok(statement)
-}
-
-#[pyfunction]
-pub fn sign_witness_statement(phrase: String,password:String,data: &str){
-    let v_password = password.clone();
-    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
-    morpheus::Plugin::init(&mut vault, v_password).unwrap();
-    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
-    let kpub = morpheus_plugin.public().unwrap().personas().unwrap().key(0).unwrap();
-    let private_key = morpheus_plugin.private(password).unwrap()
-        .key_by_pk(&kpub).unwrap().private_key();
-    let signer = PrivateKeySigner::new(private_key);
-    let statement = get_witness_statement(data).unwrap();
-    let response = signer.sign_witness_statement(statement).unwrap();
-    println!("{response:?}")
-}
-
-
-#[pyfunction]
-pub fn generate_did_by_secp_key_id(phrase: String,password:String) ->PyResult<String>{
-    let keys = get_keys(phrase, password).unwrap();
-    let m_key = MKeyId::from(keys.2);
-    let did = Did::new(m_key);
-    let k = did.to_string();
-    Ok(k)
 }
 
 #[pyfunction]
@@ -66,18 +73,21 @@ pub fn sign_did_statement(phrase: String,password:String, data: &[u8]) ->PyResul
 }
 
 #[pyfunction]
-pub fn generate_did_by_morpheus(phrase: String,password:String) ->PyResult<String>{
+pub fn sign_witness_statement(phrase: String,password:String,data: &str){
     let v_password = password.clone();
     let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
     morpheus::Plugin::init(&mut vault, v_password).unwrap();
     let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
-    let pk = morpheus_plugin.private(password).unwrap();
     let kpub = morpheus_plugin.public().unwrap().personas().unwrap().key(0).unwrap();
-    let persona = pk.key_by_pk(&kpub).unwrap();
-    let did = Did::from(persona.neuter().public_key().key_id());    
-    Ok(did.to_string())
+    let private_key = morpheus_plugin.private(password).unwrap()
+        .key_by_pk(&kpub).unwrap().private_key();
+    let signer = PrivateKeySigner::new(private_key);
+    let statement = get_witness_statement(data).unwrap();
+    let response = signer.sign_witness_statement(statement).unwrap();
+    println!("{response:?}")
 }
 
+//=================================================MILE STONE TWO ENDS HERE==========================================================
 
 
 #[derive(Debug)]
@@ -142,12 +152,7 @@ pub fn generate_transaction<'a>(
     Ok(data)    
 }
 
-#[pyfunction]
-pub fn generate_phrase() ->PyResult<String>{
-    let bip = Bip39::new();
-    let phrase = bip.generate().as_phrase().to_owned();
-    Ok(phrase)
-}
+
 
 #[pyfunction]
 #[allow(unused_variables)]
