@@ -72,6 +72,12 @@ To sign a witness statement, we use the `sign_witness_statements()` method. This
 data = {"python":"object"...}
 signed_statement = HydraChain.sign_witness_statements(data)
 ```
+A method that verifies a signed statement can also be found in the modules
+```python
+result = HydraChain.verify_signed_statement(signed_statement)
+print(result)
+>>> True
+```
 
 ## WALLET APPLICATION
 
