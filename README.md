@@ -74,7 +74,8 @@ signed_statement = HydraChain.sign_witness_statements(data)
 ```
 A method that verifies a signed statement can also be found in the modules
 ```python
-result = HydraChain.verify_signed_statement(signed_statement)
+chain = HydraChain()
+result = chain.verify_signed_statement(signed_statement)
 print(result)
 >>> True
 ```
