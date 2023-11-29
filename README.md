@@ -70,7 +70,7 @@ To sign a witness statement, we use the `sign_witness_statements()` method. This
 
 ```python
 data = {"python":"object"...}
-signed_statement = HydraChain.sign_witness_statements()
+signed_statement = HydraChain.sign_witness_statements(data)
 ```
 
 ## WALLET APPLICATION
