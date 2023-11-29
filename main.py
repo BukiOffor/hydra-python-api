@@ -1,10 +1,7 @@
 from hydra import HydraChain, HydraWallet
-import json
 
 #implement your logic here
 chain =  HydraChain()
-nonce = chain.generate_nonce()
-print(nonce)
 
 data = {
   "claim": {
@@ -32,9 +29,3 @@ data = {
 
 
 
-chain = HydraChain()
-data = chain.get_account_transactions("tdXxhgZV8aAGLL9CCJ4ry9AzTQZzRKqJ97")
-#print(data)
-for item in data:
-  sender = item['sender']
-  print(sender)
