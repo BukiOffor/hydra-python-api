@@ -72,3 +72,11 @@ To sign a witness statement, we use the `sign_witness_statements()` method. This
 data = {"python":"object"...}
 signed_statement = HydraChain.sign_witness_statements()
 ```
+
+## WALLET APPLICATION
+
+To spin up the wallet application run the command below in the base directory
+
+```bash
+source env/bin/activate && python3 app.py
+```
