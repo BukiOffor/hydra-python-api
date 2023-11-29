@@ -16,7 +16,7 @@ class BlockchainApp:
 
         # Milestone 2
         milestone2_label = tk.Label(master, text="Welcome to your Wallet")
-        milestone2_label.pack(pady=10)
+        milestone2_label.pack(pady=5)
 
         # Display Account in Use
 
@@ -37,18 +37,18 @@ class BlockchainApp:
         input_label.pack()
 
         # get unlock password from user
-        input_label = tk.Label(master, text="Enter password to create new account:")
+        input_label = tk.Label(master, text="Enter password to create new account: ⬇️")
         input_label.pack()
         self.entry_unlock_password = tk.Entry(master, width=40)
         self.entry_unlock_password.pack(pady=5, padx=40)
-        self.button_generate_wallet = tk.Button(master, text="Generate Mnemonic & Wallet", command=self.generate_wallet) #here
+        self.button_generate_wallet = tk.Button(master, text="Generate Mnemonic & Wallet ✅", command=self.generate_wallet) #here
         self.button_generate_wallet.pack(pady=5)
 
         #Mnemonic phrase generated will display in the box below
-        input_label = tk.Label(master, text="The generated 24-word phrase will be shown below")
+        input_label = tk.Label(master, text="The generated 24-word phrase will be shown below: ⬇️")
         input_label.pack()
         self.entry_new_address = tk.Entry(master, width=40)
-        self.entry_new_address.pack(pady=10)
+        self.entry_new_address.pack(pady=5)
 
 
         #Select Account to use
@@ -62,38 +62,49 @@ class BlockchainApp:
 
 
         # Generate a persona DID
-        self.button_generate_persona_did = tk.Button(master, text="Generate Persona DID", command=self.generate_persona_did) #here
-        self.button_generate_persona_did.pack(pady=5)
+        self.button_generate_persona_did = tk.Button(master, text="Generate Persona DID ✅", command=self.generate_persona_did) #here
+        self.button_generate_persona_did.pack()
         self.entry_persona_did = tk.Entry(master, width=40)
         self.entry_persona_did.insert(0, "")
-        self.entry_persona_did.pack(pady=5)
+        self.entry_persona_did.pack()
 
 
         #Delete Account to use
-        input_label = tk.Label(master, text="Enter Index of Account to delete")
+        input_label = tk.Label(master, text="Enter Index of Account to delete: ⬇️")
         input_label.pack()
         self.delete_id = tk.Entry(master, width=20)
         self.delete_id.pack(padx=10,pady=5)
-        self.button_set_delete_account = tk.Button(master, text="delete account", command=self.delete_account) #here
+        self.button_set_delete_account = tk.Button(master, text="delete account ‼️", command=self.delete_account) #here
         self.button_set_delete_account.pack(padx=5,pady=5)
 
 
         # Recover the wallet using the 24-word phrase
-        input_label = tk.Label(master, text="Enter 24-word phrase to recover wallet")
-        input_label.pack(pady=5)
+        input_label = tk.Label(master, text="Enter 24-word phrase to recover wallet: ⬇️")
+        input_label.pack()
         self.entry_recover_wallet = tk.Entry(master, width=40)
         self.entry_recover_wallet.pack()
-        input_label = tk.Label(master, text="Enter password to recover wallet")
+        input_label = tk.Label(master, text="Enter password to recover wallet: ⬇️")
         input_label.pack()
         self.entry_recover_password = tk.Entry(master, width=40)
         self.entry_recover_password.pack()
-        self.button_recover_wallet = tk.Button(master, text="Recover Wallet using 24-word phrase", command=self.recover_wallet) #here
+        self.button_recover_wallet = tk.Button(master, text="Recover Wallet ✅", command=self.recover_wallet) #here
         self.button_recover_wallet.pack(pady=5)
 
+        # Send/Receive Money
+        input_label = tk.Label(master, text="Enter address to send HYD to: ⬇️")
+        input_label.pack(anchor="s")
+        self.entry_send_address = tk.Entry(master, width=40)
+        self.entry_send_address.pack(anchor='s')
+        input_label = tk.Label(master, text="Enter amount to send: ⬇️")
+        input_label.pack(anchor='s')
+        self.entry_send_amount = tk.Entry(master, width=40)
+        self.entry_send_amount.pack(anchor='s')
+        self.button_send = tk.Button(master, text="Send ✅", command=self.send_hyd) #here
+        self.button_send.pack(anchor='s')
 
         # Create a Listbox and display transaction history
-        input_label = tk.Label(master, text="Transaction History")
-        input_label.pack(pady=5)
+        input_label = tk.Label(master, text="Transaction History 🏦")
+        input_label.pack()
         listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, width=40, height=15)
         listbox.pack(padx=10, pady=10)
         address = self.get_state()
@@ -116,17 +127,7 @@ class BlockchainApp:
         # # self.button_dislay_balance = tk.Button(master, text="Display Address/Account Transaction", command=self.display_account_balance)
         # # self.button_dislay_balance.pack(pady=5)
 
-        # Send/Receive Money
-        input_label = tk.Label(master, text="Enter address to send HYD to")
-        input_label.pack()
-        self.entry_send_address = tk.Entry(master, width=40)
-        self.entry_send_address.pack()
-        input_label = tk.Label(master, text="Enter amount to send")
-        input_label.pack()
-        self.entry_send_amount = tk.Entry(master, width=40)
-        self.entry_send_amount.pack()
-        self.button_send = tk.Button(master, text="Send", command=self.send_hyd) #here
-        self.button_send.pack(pady=5)
+        
 
 
     def send_hyd(self):
