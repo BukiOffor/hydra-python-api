@@ -5,7 +5,7 @@ import os
 
 
 
-
+#https://test.explorer.hydraledger.io/wallets/tdXxhgZV8aAGLL9CCJ4ry9AzTQZzRKqJ97
 
 # ---------------------------------------MileStone 2-----------------------------------------------------
 # |                                                                                                     |
@@ -106,13 +106,24 @@ class HydraChain:
         signed_statement = iop.sign_witness_statement(phrase, password, data)
         return signed_statement
 
-    def verify_signed_statement(signed_statement):
+    def verify_signed_statement(self,signed_statement):
         result = iop.verify_signed_statement(signed_statement)
         return result
 
-    def generate_nonce():
+    def generate_nonce(self):
         nonce = iop.generate_nonce()
         return nonce
+    
+    def get_account_transactions(self,address):
+        url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{address}/transactions"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()  # Assuming the response is in JSON format
+            return data['data']
+        else:
+            print("Failed to fetch data. Status code:", response.status_code)
+            return [] 
+
 
 
 

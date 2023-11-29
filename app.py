@@ -91,6 +91,23 @@ class BlockchainApp:
         self.button_recover_wallet.pack(pady=5)
 
 
+        # Create a Listbox and display transaction history
+        input_label = tk.Label(master, text="Transaction History")
+        input_label.pack(pady=5)
+        listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, width=40, height=15)
+        listbox.pack(padx=10, pady=10)
+        address = self.get_state()
+        transactions = self.blockchain.get_account_transactions(address)
+        for item in transactions:
+            sender, recipient = item['sender'],item['recipient']
+            amount = item['amount']
+            if sender == address:
+                listbox.insert(tk.END, f"Sent {amount} hyd to {recipient}")
+            else:
+                listbox.insert(tk.END, f"Received {amount} hyd from {sender}")
+
+
+
         # # Display all transactions
         # self.button_display_account_transactions = tk.Button(master, text="Display Address/Account Transaction", command="")#here
         # self.button_display_account_transactions.pack(pady=5)
@@ -189,6 +206,8 @@ class BlockchainApp:
         if self.blockchain.address == '':
             messagebox.showerror("Error", "You need to create a vault or address")
             return
+        address = self.get_state()
+        transactions = self.blockchain.get_account_transactions(address)
         
         messagebox.showinfo("Info", "Under development, Please try again later or wait for update")
 
