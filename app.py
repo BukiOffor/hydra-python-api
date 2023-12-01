@@ -118,18 +118,6 @@ class BlockchainApp:
                 listbox.insert(tk.END, f"Received {amount} hyd from {sender}")
 
 
-
-        # # Display all transactions
-        # self.button_display_account_transactions = tk.Button(master, text="Display Address/Account Transaction", command="")#here
-        # self.button_display_account_transactions.pack(pady=5)
-
-        # # Get list of all new transactions since last change
-        # # self.button_dislay_balance = tk.Button(master, text="Display Address/Account Transaction", command=self.display_account_balance)
-        # # self.button_dislay_balance.pack(pady=5)
-
-        
-
-
     def send_hyd(self):
         address = self.entry_send_address.get()
         amount = self.entry_send_amount.get()
@@ -141,7 +129,6 @@ class BlockchainApp:
         else:
             messagebox.showerror("Error", "Something went Wrong with your transaction.")
    
-
 
     def delete_account(self):
         delete_id = self.delete_id.get()
