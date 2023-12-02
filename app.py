@@ -26,9 +26,10 @@ class BlockchainApp:
 
         # display balance
         wallet = self.get_acc_details()
-        balance = wallet.display_address_balance()
-        input_label = tk.Label(master, text=f"Balance: {balance}")
-        input_label.pack()
+        if wallet != None:
+            balance = wallet.display_address_balance()
+            input_label = tk.Label(master, text=f"Balance: {balance}")
+            input_label.pack()
 
 
          #Acoounts Availaible
