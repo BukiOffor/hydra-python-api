@@ -124,7 +124,7 @@ class BlockchainApp:
         amount = self.entry_send_amount.get()
         if len(self.wallets) > 0 and address != "" and amount != "":    
             account = self.get_acc_details()
-            txhash = account.send_transaction(address, amount)
+            txhash = account.send_transaction(address, int(amount))
             messagebox.showinfo("Info", f"Transaction was successful\nTransaction ID: {txhash}")
 
         else:
