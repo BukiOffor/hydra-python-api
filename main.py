@@ -9,7 +9,7 @@ data = {
     "content": {
         "userId": "5d5d9eda-d3a9-4347-b4ae-b176b75dcf51",
         "fullName": {
-            "nonce": chain.generate_nonce(),
+            "nonce": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
             "value": "John Doe"
         },
         "address": {
@@ -20,7 +20,7 @@ data = {
   },
   "processId": "cjuQR3pDJeaiRv9oCZ-fBE7T8QWpUGfjP40sAXq0bLwr-8",
   "constraints": {
-    "authority": chain.generate_did(),
+    "authority": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
     "witness": "uVIc9J4UjKx8tRs6HUEDQElksBCtF9VnHb439boVmB9cw",
     "content": None
   },

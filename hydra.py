@@ -25,19 +25,9 @@ import os
 
 
 class HydraChain:
-
-    home_directory = os.path.expanduser("~")
-    file_path = home_directory+"/.hydra_wallet"
     
     def __init__(self) -> None:
-        pass
-    @classmethod
-    def load_wallets(cls):
-        wallets = []
-        with open(cls.file_path, 'r') as file:
-            for line in file:
-                wallets.append(line.strip())
-            return wallets
+        pass    
 
     def generate_wallet(self, password):
         phrase = iop.generate_phrase()
@@ -48,63 +38,8 @@ class HydraChain:
             "public_key": public_key
         }
         vault = json.dumps(vault)
-        home_directory = os.path.expanduser("~")
-        f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
-        os.close (f1)
-        with open(home_directory+'/.hydra_wallet', 'a') as file:
-            file.write(vault+"\n")
-        file.close()
-        return phrase
-    
-    def recover_wallet(self,phrase,password):
-        public_key = iop.get_public_key(phrase, password)
-        vault = {
-            "phrase": phrase,
-            "password": password,
-            "public_key": public_key
-        }
-        vault = json.dumps(vault)
-        home_directory = os.path.expanduser("~")
-        f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
-        os.close (f1)
-        with open(home_directory+'/.hydra_wallet', 'a') as file:
-            file.write(vault+"\n")
-        file.close()
-    
-
-    @classmethod
-    def delete_account(cls,index):
-        wallets = cls.load_wallets()
-        wallets.pop(int(index))
-        f1 = os.open (cls.home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
-        os.close(f1)
-        for line in wallets:
-            with open(cls.home_directory+'/.hydra_wallet', 'w') as file:
-                file.write(line+"\n")
-            file.close()
-
-
-    @classmethod
-    def generate_did(cls):
-        #with open(cls.file_path, 'r') as file:
-            #file_content = file.read()
-        file_content = cls.load_wallets()
-        vault = json.loads(file_content[0])
-        phrase, password = vault['phrase'],vault['password']
-        _did = iop.generate_did_by_secp_key_id(phrase, password)
-        did = iop.generate_did_by_morpheus(phrase, password)
-        return(did)
-
-    @classmethod
-    def sign_witness_statements(cls,data):
-        #with open(cls.file_path, 'r') as file:
-            #file_content = file.read()
-        file_content = cls.load_wallets()
-        vault = json.loads(file_content[0])
-        phrase, password = vault['phrase'],vault['password']
-        data = json.dumps(data)
-        signed_statement = iop.sign_witness_statement(phrase, password, data)
-        return signed_statement
+        return vault
+            
 
     def verify_signed_statement(self,signed_statement):
         result = iop.verify_signed_statement(signed_statement)
@@ -126,8 +61,6 @@ class HydraChain:
 
 
 
-
-
 class HydraWallet:
 
     def __init__(self,phrase,password):
@@ -142,6 +75,10 @@ class HydraWallet:
     async def send_tx(phrase, receiver, amount, nonce, password):
         response = await iop.send_transaction_with_python(phrase,receiver,amount,nonce,password)
         return response
+    def generate_did(self):
+        _did = iop.generate_did_by_secp_key_id(self.phrase, self.password)
+        did = iop.generate_did_by_morpheus(self.phrase, self.password)
+        return(did)
     
     def get_nonce(self):
         addr = self.get_wallet_address()
@@ -193,8 +130,10 @@ class HydraWallet:
             print("Failed to fetch data. Status code:", response.status_code)  
 
 
-
- 
+    def sign_witness_statements(self,data):
+        data = json.dumps(data)
+        signed_statement = iop.sign_witness_statement(self.phrase, self.password, data)
+        return signed_statement
 
     
    
