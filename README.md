@@ -52,25 +52,31 @@ This milestone uses the `HydraChain` class from the hydra module to achieve its 
 
 To generate a 24 word phrase, we call the `generate_wallet()` method from our module. This function takes a password.
 ```python
-import HydraChain
-password = "horse%staple-attack"
-HydraChain.generate_wallet(password)
+from hydra import HydraChain
+password = "horse-staple-attack"
+vault = HydraChain.generate_wallet(password)
 ```
 The above code will generate a 24 word phrase and stores it in a `.hydra_wallet` file in the home directory with a permission of `077`. 
 
 To generate a persona did on chain, we use the method `generate_did()`. This function reads the `.hydra_wallet` file and generates a did persona with the seed phrase.
 
 ```python
-did = HydraChain.generate_did()
+from hydra import HydraWallet
+password = "password"
+myWallet = HydraWallet("blind market ability .....", password)
+did = myWallet.generate_did()
 print(did)
 >>> did:morpheus:ez22Y8sKi9g18FU9ofVMbb2aD
 ```
 
-To sign a witness statement, we use the `sign_witness_statements()` method. This method takes an object of the neccesary parameters and signs them using the users credential.
+To sign a witness statement, we use the `sign_witness_statements()` method. This method from  `HydraWallet` takes an object of the neccesary parameters and signs them using the users credential.
 
 ```python
-data = {"python":"object"...}
-signed_statement = HydraChain.sign_witness_statements(data)
+from hydra import HydraWallet
+password = "password"
+myWallet = HydraWallet("blind market ability .....", password)
+data = {"claim":"subject":{}...}
+signed_statement = myWallet.sign_witness_statements(data)
 ```
 A method that verifies a signed statement can also be found in the modules
 ```python
