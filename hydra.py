@@ -34,9 +34,13 @@ class HydraChain:
     @classmethod
     def load_wallets(cls):
         wallets = []
-        with open(cls.file_path, 'r') as file:
-            for line in file:
-                wallets.append(line.strip())
+        try:
+            with open(cls.file_path, 'r') as file:
+                for line in file:
+                    wallets.append(line.strip())
+                return wallets
+        except FileNotFoundError:
+            print("file does not exists")
             return wallets
 
     def generate_wallet(self, password):
@@ -86,14 +90,13 @@ class HydraChain:
 
     @classmethod
     def generate_did(cls):
-        #with open(cls.file_path, 'r') as file:
-            #file_content = file.read()
         file_content = cls.load_wallets()
-        vault = json.loads(file_content[0])
-        phrase, password = vault['phrase'],vault['password']
-        _did = iop.generate_did_by_secp_key_id(phrase, password)
-        did = iop.generate_did_by_morpheus(phrase, password)
-        return(did)
+        if len(file_content) > 0:
+            vault = json.loads(file_content[0])
+            phrase, password = vault['phrase'],vault['password']
+            _did = iop.generate_did_by_secp_key_id(phrase, password)
+            did = iop.generate_did_by_morpheus(phrase, password)
+            return(did)
 
     @classmethod
     def sign_witness_statements(cls,data):
