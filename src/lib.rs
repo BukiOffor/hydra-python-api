@@ -15,6 +15,17 @@ use iop_sdk::morpheus::crypto::{Signed,sign::PrivateKeySigner};
 
 
 
+#[pyfunction]
+#[allow(unused_variables)]
+pub fn test_wallet(phrase: String, password:String) -> PyResult<String> {
+    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+    let params = hydra::Parameters::new(&hyd::Testnet,0);
+    hydra::Plugin::init(&mut vault, &password, &params).expect("plugin could not be initialised");
+    let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be initialized");
+    let admin = serde_json::to_string_pretty(&vault).unwrap();    
+    Ok(admin)
+}
+
 //=================================================MILE STONE TWO STARTS HERE==========================================================
 #[pyfunction]
 pub fn verify_signed_statement(data:&str)->PyResult<bool>{
@@ -230,6 +241,8 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sign_witness_statement, m)?)?;
     m.add_function(wrap_pyfunction!(verify_signed_statement, m)?)?;
     m.add_function(wrap_pyfunction!(generate_nonce, m)?)?;
+    m.add_function(wrap_pyfunction!(test_wallet, m)?)?;
+
 
 
 
