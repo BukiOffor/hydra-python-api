@@ -3,19 +3,15 @@ use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner, json
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
 use pyo3::prelude::*;
-use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
+use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network,morpheus,PublicKey}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
 use iop_sdk::hydra::txtype::{
     OptionalTransactionFields,CommonTransactionFields,
     Aip29Transaction,hyd_core::Transaction
 };
 
-use iop_sdk::vault::morpheus;
 use iop_sdk::multicipher::MKeyId;
-use iop_sdk::morpheus::data::Did;
-use iop_sdk::morpheus::crypto::sign::PrivateKeySigner;
-use iop_sdk::vault::PublicKey;
-use iop_sdk::morpheus::data::WitnessStatement;
-use iop_sdk::morpheus::crypto::Signed;
+use iop_sdk::morpheus::data::{Did,WitnessStatement};
+use iop_sdk::morpheus::crypto::{Signed,sign::PrivateKeySigner};
 
 
 
