@@ -33,32 +33,37 @@ class HydraChain:
         pass
     @classmethod
     def load_wallets(cls):
-        wallets = []
         try:
             with open(cls.file_path, 'r') as file:
-                for line in file:
-                    wallets.append(line.strip())
+                wallets = json.load(file)
                 return wallets
         except FileNotFoundError:
             print("file does not exists")
-            return wallets
+            return []
 
     def generate_wallet(self, password):
         phrase = iop.generate_phrase()
-        public_key = iop.get_public_key(phrase, password)
-        vault = {
-            "phrase": phrase,
-            "password": password,
-            "public_key": public_key
-        }
-        vault = json.dumps(vault)
+        vault = iop.get_vault(phrase, password)
+        vault = json.loads(vault)
         home_directory = os.path.expanduser("~")
-        f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
-        os.close (f1)
-        with open(home_directory+'/.hydra_wallet', 'a') as file:
-            file.write(vault+"\n")
-        file.close()
-        return phrase
+        try:
+            with open(home_directory+'/.hydra_wallet', 'r') as file:
+                data = json.load(file)
+                data.append(vault)
+            with open(home_directory+'/.hydra_wallet', 'w') as json_file:
+                json.dump(data, json_file, indent=4)
+            return vault
+        except FileNotFoundError:
+            myvault = []
+            myvault.append(vault)
+            with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
+                json.dump(myvault, json_file, indent=4)
+            return vault
+        
+
+        # with open(home_directory+'/.hydra_wallet', 'a') as json_file:
+        #     json.dump(vault, json_file, indent=4)
+        # return vault
     
     def recover_wallet(self,phrase,password):
         public_key = iop.get_public_key(phrase, password)
