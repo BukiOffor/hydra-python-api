@@ -31,19 +31,6 @@ class HydraChain:
     
     def __init__(self) -> None:
         pass
-       
-    
-
-    @classmethod
-    def delete_account(cls,index):
-        wallets = cls.load_wallets()
-        wallets.pop(int(index))
-        f1 = os.open (cls.home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
-        os.close(f1)
-        for line in wallets:
-            with open(cls.home_directory+'/.hydra_wallet', 'w') as file:
-                file.write(line+"\n")
-            file.close()
 
     def verify_signed_statement(self,signed_statement):
         result = iop.verify_signed_statement(signed_statement)
@@ -76,6 +63,17 @@ class HydraWallet:
     def generate_phrase(self):
         phrase = iop.generate_phrase()
         return phrase
+    
+    @classmethod
+    def load_wallets(cls):
+        try:
+            with open(cls.file_path, 'r') as file:
+                wallets = json.load(file)
+                return wallets
+        except FileNotFoundError:
+            print("file does not exists")
+            return []
+        
     @classmethod
     def generate_wallet(cls, password,phrase):
         hyd_vault = iop.get_hyd_vault(phrase, password)
@@ -103,10 +101,11 @@ class HydraWallet:
     @classmethod
     def get_wallet_address(cls):
         data = cls.load_wallets()
-        vault = data[0][0]
-        data = json.dumps(vault)
-        addr = iop.get_wallet(data)
-        return addr
+        if len(data) > 0:
+            vault = data[0][0]
+            data = json.dumps(vault)
+            addr = iop.get_wallet(data)
+            return addr
     
 
     @classmethod
@@ -117,6 +116,7 @@ class HydraWallet:
             vault = json.dumps(vault)
             did = iop.generate_did_by_morpheus(vault, password)
             return(did)
+
 
     def recover_wallet(cls,password,phrase):
         vault = cls.generate_wallet(password,phrase)
@@ -142,18 +142,10 @@ class HydraWallet:
         else:
             print("Failed to fetch data. Status code:", response.status_code)   
 
-    @classmethod
-    def load_wallets(cls):
-        try:
-            with open(cls.file_path, 'r') as file:
-                wallets = json.load(file)
-                return wallets
-        except FileNotFoundError:
-            print("file does not exists")
-            return []
+    
         
     def sign_transaction(cls,receiver,amount,password):
-        nonce = 25 #self.get_nonce()
+        nonce = cls.get_nonce()
         vaults = cls.load_wallets()
         vault = vaults[0][0]
         data = json.dumps(vault)
@@ -182,18 +174,40 @@ class HydraWallet:
         time = response['data']['timestamp']['human']          
         return f"Transaction with id {txid} was sent successfully at {time} with a fee of {fee} Hyd and has {confirmations} confirmations"
 
-        
-    def display_address_balance(self):
-        addr = self.get_wallet_address()
+    @classmethod   
+    def display_address_balance(cls):
+        addr = cls.get_wallet_address()
+        if addr == None:
+            return None
         response = requests.get(f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}")
         if response.status_code == 200:
             data = response.json()
             balance = data['data']['balance']
             return balance
         else:
-            print("Failed to fetch data. Status code:", response.status_code)  
+            print("Failed to fetch data. Status code:", response.status_code) 
+            return None 
 
+    def get_account_transactions(cls):
+        addr = cls.get_wallet_address()
+        if addr == None:
+            return None
+        url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}/transactions"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()  # Assuming the response is in JSON format
+            return data['data']
+        else:
+            print("Failed to fetch data. Status code:", response.status_code)
+            return [] 
+        
 
+    @classmethod
+    def delete_account(cls,index):
+        wallets = cls.load_wallets()
+        wallets.pop(int(index))
+        with open(cls.file_path, 'w') as json_file:
+            json.dump(wallets, json_file, indent=2)
 
  
 
