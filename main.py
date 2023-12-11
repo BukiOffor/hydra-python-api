@@ -1,4 +1,4 @@
-from hydra import HydraChain, HydraWallet
+from api.hydra import HydraChain, HydraWallet
 import json
 
 

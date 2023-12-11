@@ -26,7 +26,7 @@ maturin develop
 
 ## Usage
 
-`hydra.py` contains a module that interacts with the hydra testnet. To use the module, you can import the `HydraWallet` class from hydra.py.
+`hydra.py` contains a module that interacts with the hydra testnet. To use the module, you can import the `HydraWallet` class from api/hydra.py.
 
 ```python
 from hydra import HydraWallet, HydraChain
@@ -51,5 +51,5 @@ print(result)
 To spin up the wallet application run the command below in the base directory
 
 ```bash
-source env/bin/activate && python3 app.py
+source env/bin/activate && python3 app/app.py
 ```

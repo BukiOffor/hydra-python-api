@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from hydra import HydraChain, HydraWallet
+from api.hydra import HydraWallet
 import json
 
 
