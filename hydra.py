@@ -103,7 +103,9 @@ class HydraWallet:
         data = cls.load_wallets()
         if len(data) > 0:
             vault = data[0][0]
+            _params = vault['plugins'][0]['parameters']
             data = json.dumps(vault)
+            params = json.dumps(_params)
             addr = iop.get_wallet(data)
             return addr
     
@@ -148,7 +150,9 @@ class HydraWallet:
         nonce = cls.get_nonce()
         vaults = cls.load_wallets()
         vault = vaults[0][0]
+        _params = vault['plugins'][0]['parameters']
         data = json.dumps(vault)
+        params = json.dumps(_params)
         response = iop.generate_transaction(data,receiver,amount,nonce,password)
         signed_txs = json.loads(response)
         return signed_txs    

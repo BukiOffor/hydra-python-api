@@ -135,15 +135,17 @@ class BlockchainApp:
         if len(self.wallets) > 0 and address != "" and amount != "" and password != "":    
             txhash = self.blockchain.send_transaction(address, int(amount),password)
             messagebox.showinfo("Info", f"Transaction was successful\nTransaction ID: {txhash}")
-
         else:
             messagebox.showerror("Error", "Something went Wrong with your transaction.\n Make sure you filled in the receiptient address, amount and password")
    
 
     def delete_account(self):
         delete_id = self.delete_id.get()
-        self.blockchain.delete_account(delete_id)
-        messagebox.showinfo("Info", f"Transaction was successful\nAccount with ID: {delete_id} has been deleted")
+        if delete_id != "":
+            self.blockchain.delete_account(delete_id)
+            messagebox.showinfo("Info", f"Transaction was successful\nAccount with ID: {delete_id} has been deleted")
+        else:
+            messagebox.showerror("Error", "Put the index of account you want to delete.")
 
 
     def get_state(self):
