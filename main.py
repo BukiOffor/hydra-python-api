@@ -1,7 +1,11 @@
 from hydra import HydraChain, HydraWallet
+import iop_python as iop
+import json
+
 
 #implement your logic here
 chain =  HydraChain()
+wallet = HydraWallet()
 
 # data = {
 #   "claim": {
@@ -31,6 +35,18 @@ chain =  HydraChain()
 #print(wallet)
 
 wallets = chain.load_wallets()
-print(wallets[0]['encryptedSeed'])
+#print(wallets[0][0]["encryptedSeed"])
+# wallet = json.dumps(wallets[1])
+# pk = iop.deserialize(wallet, "password")
+# print(pk)
 
+#wallet = HydraWallet()
+# wallet.generate_wallet("password")
+#phrase = "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather scan"
+#vault = wallet.recover_wallet("password",phrase)
 
+# res = wallet.send_transaction("taQb8gfnetDt6KtRH3n11M3APMzrWiBhhg",100,"password")
+# print(res)
+
+res = wallet.check_transaction("60607b8ee666f9405815ea8f608610fa89bdd04b30190b2a204f31ac2f072183")
+print(res)

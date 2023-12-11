@@ -66,11 +66,9 @@ class HydraChain:
         # return vault
     
     def recover_wallet(self,phrase,password):
-        public_key = iop.get_public_key(phrase, password)
         vault = {
             "phrase": phrase,
             "password": password,
-            "public_key": public_key
         }
         vault = json.dumps(vault)
         home_directory = os.path.expanduser("~")
@@ -138,21 +136,53 @@ class HydraChain:
 
 class HydraWallet:
 
-    def __init__(self,phrase,password):
-        self.phrase = phrase
-        self.password = password
-   
+    home_directory = os.path.expanduser("~")
+    file_path = home_directory+"/.hydra_wallet"
+
+    def __init__(self) -> None:
+        pass
+
+    def generate_phrase(self):
+        phrase = iop.generate_phrase()
+        return phrase
+    @classmethod
+    def generate_wallet(cls, password,phrase):
+        hyd_vault = iop.get_hyd_vault(phrase, password)
+        morpheus_vault = iop.get_morpheus_vault(phrase, password)
+        h_vault = json.loads(hyd_vault)
+        m_vault = json.loads(morpheus_vault)
+        vaults = []
+        vaults.append(h_vault) 
+        vaults.append(m_vault)
+        home_directory = os.path.expanduser("~")
+        try:
+            with open(cls.file_path, 'r') as file:
+                data = json.load(file)
+                data.append(vaults)
+            with open(home_directory+'/.hydra_wallet', 'w') as json_file:
+                json.dump(data, json_file,indent=2)
+            return vaults
+        except FileNotFoundError:
+            myvault = []
+            myvault.append(vaults)
+            with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
+                json.dump(myvault, json_file, indent=2)
+            return vaults
     
-    def get_wallet_address(self):
-        addr = iop.get_wallet(self.phrase,self.password)
+    @classmethod
+    def get_wallet_address(cls):
+        data = cls.load_wallets()
+        data = data[0][0]
+        addr = iop.get_wallet(data)
         return addr
     
-    async def send_tx(phrase, receiver, amount, nonce, password):
-        response = await iop.send_transaction_with_python(phrase,receiver,amount,nonce,password)
-        return response
+    def recover_wallet(cls,password,phrase):
+        vault = cls.generate_wallet(password,phrase)
+        return vault
+          
     
-    def get_nonce(self):
-        addr = self.get_wallet_address()
+    def get_nonce(cls):
+        addr = cls.get_wallet_address()
         url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}"
         response = requests.get(url)
         if response.status_code == 200:
@@ -162,16 +192,29 @@ class HydraWallet:
         else:
             print("Failed to fetch data. Status code:", response.status_code)   
 
-    def sign_transaction(self,receiver,amount):
-        nonce = self.get_nonce()
-        response = iop.generate_transaction(self.phrase,receiver,amount,nonce,self.password)
+    @classmethod
+    def load_wallets(cls):
+        try:
+            with open(cls.file_path, 'r') as file:
+                wallets = json.load(file)
+                return wallets
+        except FileNotFoundError:
+            print("file does not exists")
+            return []
+        
+    def sign_transaction(cls,receiver,amount,password):
+        nonce = 25 #self.get_nonce()
+        vaults = cls.load_wallets()
+        vault = vaults[0][0]
+        data = json.dumps(vault)
+        response = iop.generate_transaction(data,receiver,amount,nonce,password)
         signed_txs = json.loads(response)
         return signed_txs    
 
     #this function assumes that the wallet has made a transaction before
-    def send_transaction(self,receiver,amount):
+    def send_transaction(self,receiver,amount,password):
         # Send a GET request to the URL
-        signed_txs = self.sign_transaction(receiver,amount)
+        signed_txs = self.sign_transaction(receiver,amount,password)
         url = "https://test.explorer.hydraledger.io:4705/api/v2/transactions"
         res = requests.post(url, json=signed_txs)
         response = res.json()
