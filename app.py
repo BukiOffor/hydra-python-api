@@ -9,7 +9,7 @@ class BlockchainApp:
         self.master = master
         self.master.title("Blockchain App - MILESTONE 2")
 
-        self.blockchain = HydraChain()
+        self.blockchain = HydraWallet()
         self.wallets = self.get_vaults()
         self.active_acc = 0
         
@@ -27,7 +27,7 @@ class BlockchainApp:
         # display balance
         wallet = self.get_acc_details()
         if wallet != None:
-            balance = wallet.display_address_balance()
+            balance = self.blockchain.display_address_balance()
             input_label = tk.Label(master, text=f"Balance: {balance}")
             input_label.pack()
 
@@ -63,6 +63,10 @@ class BlockchainApp:
 
 
         # Generate a persona DID
+        input_label = tk.Label(master, text="Password to generate did ⬇️ ")
+        input_label.pack()
+        self.did_password = tk.Entry(master, width=20)
+        self.did_password.pack(padx=1,pady=1)
         self.button_generate_persona_did = tk.Button(master, text="Generate Persona DID ✅", command=self.generate_persona_did) #here
         self.button_generate_persona_did.pack()
         self.entry_persona_did = tk.Entry(master, width=40)
@@ -74,9 +78,9 @@ class BlockchainApp:
         input_label = tk.Label(master, text="Enter Index of Account to delete: ⬇️")
         input_label.pack()
         self.delete_id = tk.Entry(master, width=20)
-        self.delete_id.pack(padx=10,pady=5)
+        self.delete_id.pack(padx=1,pady=1)
         self.button_set_delete_account = tk.Button(master, text="delete account ‼️", command=self.delete_account) #here
-        self.button_set_delete_account.pack(padx=5,pady=5)
+        self.button_set_delete_account.pack(padx=2,pady=2)
 
 
         # Recover the wallet using the 24-word phrase
@@ -100,6 +104,10 @@ class BlockchainApp:
         input_label.pack(anchor='s')
         self.entry_send_amount = tk.Entry(master, width=40)
         self.entry_send_amount.pack(anchor='s')
+        input_label = tk.Label(master, text="Enter wallet password: ⬇️")
+        input_label.pack(anchor='s')
+        self.wallet_password = tk.Entry(master, width=40)
+        self.wallet_password.pack(anchor='s')
         self.button_send = tk.Button(master, text="Send ✅", command=self.send_hyd) #here
         self.button_send.pack(anchor='s')
 
@@ -109,26 +117,27 @@ class BlockchainApp:
         listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, width=40, height=15)
         listbox.pack(padx=10, pady=10)
         address = self.get_state()
-        transactions = self.blockchain.get_account_transactions(address)
-        for item in transactions:
-            sender, recipient = item['sender'],item['recipient']
-            amount = item['amount']
-            if sender == address:
-                listbox.insert(tk.END, f"Sent {amount} hyd to {recipient}")
-            else:
-                listbox.insert(tk.END, f"Received {amount} hyd from {sender}")
+        transactions = self.blockchain.get_account_transactions()
+        if transactions != None:
+            for item in transactions:
+                sender, recipient = item['sender'],item['recipient']
+                amount = item['amount']
+                if sender == address:
+                    listbox.insert(tk.END, f"Sent {amount} hyd to {recipient}")
+                else:
+                    listbox.insert(tk.END, f"Received {amount} hyd from {sender}")
 
 
     def send_hyd(self):
         address = self.entry_send_address.get()
         amount = self.entry_send_amount.get()
-        if len(self.wallets) > 0 and address != "" and amount != "":    
-            account = self.get_acc_details()
-            txhash = account.send_transaction(address, int(amount))
+        password = self.wallet_password.get()
+        if len(self.wallets) > 0 and address != "" and amount != "" and password != "":    
+            txhash = self.blockchain.send_transaction(address, int(amount),password)
             messagebox.showinfo("Info", f"Transaction was successful\nTransaction ID: {txhash}")
 
         else:
-            messagebox.showerror("Error", "Something went Wrong with your transaction.")
+            messagebox.showerror("Error", "Something went Wrong with your transaction.\n Make sure you filled in the receiptient address, amount and password")
    
 
     def delete_account(self):
@@ -139,18 +148,13 @@ class BlockchainApp:
 
     def get_state(self):
         if len(self.wallets) > 0:
-            acc = self.wallets[self.active_acc]
-            acc = json.loads(acc)
-            account = HydraWallet(acc['phrase'], acc["password"])
-            address = account.get_wallet_address()
+            address = self.blockchain.get_wallet_address()
             return address
         
     def get_acc_details(self):
         if len(self.wallets) > 0:
-            acc = self.wallets[self.active_acc]
-            acc = json.loads(acc)
-            account = HydraWallet(acc['phrase'], acc["password"])
-            return account
+            address = self.blockchain.get_wallet_address()
+            return address
 
     def active_account(self):
         if len(self.wallets) > 0:
@@ -166,16 +170,17 @@ class BlockchainApp:
         if unlock_password == '':
             messagebox.showerror("Error", "Please enter password for your wallet.")
             return
-        
-        resp = self.blockchain.generate_wallet(unlock_password)
+        phrase = self.blockchain.generate_phrase()
+        resp = self.blockchain.generate_wallet(unlock_password,phrase)
         self.entry_new_address.insert(0, resp)
 
     def generate_persona_did(self):
-        if len(self.wallets) > 0:
-            resp = self.blockchain.generate_did()
+        password = self.did_password.get()
+        if len(self.wallets) > 0 and password != "":
+            resp = self.blockchain.generate_did(password)
             self.entry_persona_did.insert(0,resp)
         else:
-            messagebox.showerror("Error", "You do not have an active wallet.")
+            messagebox.showerror("Error", "You do not have an active wallet or forgot to put your password")
 
 
     def recover_wallet(self):
@@ -184,7 +189,7 @@ class BlockchainApp:
         if wallet_phrase == '' or password == "":
             messagebox.showerror("Error", "Enter your wallet 24-word phrase and password")
             return     
-        self.blockchain.recover_wallet(wallet_phrase,password)
+        self.blockchain.recover_wallet(password,wallet_phrase)
         messagebox.showinfo("Wallet Recovered!", "Your wallet has been recovered")
 
 
@@ -196,7 +201,7 @@ class BlockchainApp:
             messagebox.showerror("Error", "You need to create a vault or address")
             return
         address = self.get_state()
-        transactions = self.blockchain.get_account_transactions(address)
+        transactions = self.blockchain.get_account_transactions()
         
         messagebox.showinfo("Info", "Under development, Please try again later or wait for update")
 

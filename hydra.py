@@ -67,11 +67,11 @@ class HydraWallet:
     @classmethod
     def load_wallets(cls):
         try:
-            with open(cls.file_path, 'r') as file:
-                wallets = json.load(file)
+            with open(cls.file_path, 'r') as json_file:
+                wallets = json.load(json_file)
                 return wallets
         except FileNotFoundError:
-            print("file does not exists")
+            print("user does not own any wallets")
             return []
         
     @classmethod
@@ -90,13 +90,13 @@ class HydraWallet:
                 data.append(vaults)
             with open(home_directory+'/.hydra_wallet', 'w') as json_file:
                 json.dump(data, json_file,indent=2)
-            return vaults
+            return phrase
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
             with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
-            return vaults
+            return phrase
     
     @classmethod
     def get_wallet_address(cls):
