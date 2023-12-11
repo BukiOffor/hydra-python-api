@@ -45,28 +45,6 @@ class HydraChain:
                 file.write(line+"\n")
             file.close()
 
-
-    @classmethod
-    def generate_did(cls):
-        file_content = cls.load_wallets()
-        if len(file_content) > 0:
-            vault = json.loads(file_content[0])
-            phrase, password = vault['phrase'],vault['password']
-        
-            did = iop.generate_did_by_morpheus(phrase, password)
-            return(did)
-
-    @classmethod
-    def sign_witness_statements(cls,data):
-        #with open(cls.file_path, 'r') as file:
-            #file_content = file.read()
-        file_content = cls.load_wallets()
-        vault = json.loads(file_content[0])
-        phrase, password = vault['phrase'],vault['password']
-        data = json.dumps(data)
-        signed_statement = iop.sign_witness_statement(data)
-        return signed_statement
-
     def verify_signed_statement(self,signed_statement):
         result = iop.verify_signed_statement(signed_statement)
         return result
@@ -84,8 +62,6 @@ class HydraChain:
         else:
             print("Failed to fetch data. Status code:", response.status_code)
             return [] 
-
-
 
 
 
@@ -145,7 +121,15 @@ class HydraWallet:
     def recover_wallet(cls,password,phrase):
         vault = cls.generate_wallet(password,phrase)
         return vault
-          
+
+    @classmethod
+    def sign_witness_statements(cls,password, data):
+        file_content = cls.load_wallets()
+        if len(file_content) > 0:
+            vault = file_content[0][1]
+            vault = json.dumps(vault)
+            signed_statement = iop.sign_witness_statement(vault,password,data)
+            return signed_statement      
     
     def get_nonce(cls):
         addr = cls.get_wallet_address()

@@ -31,7 +31,13 @@ data = {
   "nonce": chain.generate_nonce(),
 }
 
-print(data)
+#data = json.dumps(data)
+#signature = wallet.sign_witness_statements("password",data)
+
+signature = {"signature":{"publicKey":"pez51beNrBRCSc1PguzA9WwA8gDSQBMtWwBFP9nTBDYea4o","bytes":"sez7vHmaE86RT27MMnjS3p4yvEA2EwLWPiFF4zi8eY6fazh2TjxnKyMUF3HajhEgLCC4dppTnK5eYkFumFFdXBNTy1B"},"content":{"processId":"cjuQR3pDJeaiRv9oCZ-fBE7T8QWpUGfjP40sAXq0bLwr-8","claim":{"subject":"did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr","content":{"userId":"5d5d9eda-d3a9-4347-b4ae-b176b75dcf51","fullName":{"nonce":"upnSP2jF03sFZFFT-CWF1DK-rTtT5_BA6IRPGlLT0FoAZ","value":"John Doe"},"address":{"nonce":"u2Dgyj2uM9bFu5C_25gZw-n2rejebM9ONySGQcIDHicZW","value":"6 Unter den Linden, Berlin, Germany"}}},"constraints":{"after":None,"before":None,"witness":"uVIc9J4UjKx8tRs6HUEDQElksBCtF9VnHb439boVmB9cw","authority":"did:morpheus:ezkTDEVnXp3AZhmze9fmZUTs","content":None},"nonce":"ukkR1gCpx50k-FoE7VX0qIldF9WvxF9C8Zc3UjFT2BNbJ"}}
+
+response = chain.verify_signed_statement(json.dumps(signature))
+print(response)
 
 #wallet = chain.generate_wallet("password")
 #print(wallet)
