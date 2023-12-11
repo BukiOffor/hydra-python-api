@@ -3,13 +3,14 @@ use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner, json
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
 use pyo3::prelude::*;
-use iop_sdk::{vault::{Bip39, Vault, hydra, PrivateKey, Network,morpheus}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
+use iop_sdk::{vault::{Bip39, Vault, hydra,morpheus}, ciphersuite::secp256k1::{hyd,SecpPrivateKey,SecpPublicKey,SecpKeyId}};
 use iop_sdk::hydra::txtype::{
     OptionalTransactionFields,CommonTransactionFields,
     Aip29Transaction,hyd_core::Transaction
 };
 
-use iop_sdk::multicipher::MKeyId;
+//use iop_sdk::multicipher::MKeyId;
+//use iop_sdk::vault::{PrivateKey,Network,};
 use iop_sdk::morpheus::data::{Did,WitnessStatement};
 use iop_sdk::morpheus::crypto::{Signed,sign::PrivateKeySigner};
 use iop_sdk::vault::morpheus::Private;
@@ -64,7 +65,6 @@ fn deserialize_morpheus(data: String, unlock_password:String) -> Result<(Private
     let pk = morpheus_plugin.private(unlock_password).unwrap();
     let kpub = morpheus_plugin.public().unwrap().personas().unwrap().key(0).unwrap();
     let persona = pk.key_by_pk(&kpub).unwrap();
-    
     Ok((pk,kpub))       
 }
 
@@ -82,7 +82,6 @@ pub fn generate_nonce()->PyResult<String>{
     let nonce = Nonce264::generate().0; 
     Ok(nonce)
 }
-
 
 #[pyfunction]
 pub fn generate_phrase() ->PyResult<String>{
@@ -108,14 +107,10 @@ pub fn get_witness_statement(data: &str)->Result<WitnessStatement,()>{
 }
 
 #[pyfunction]
-pub fn sign_did_statement(phrase: String,password:String, data: &[u8]) ->PyResult<(String,String)>{
-    let v_password = password.clone();
-    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
-    morpheus::Plugin::init(&mut vault, v_password).unwrap();
-    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
-    let private_key = morpheus_plugin.private(password).unwrap()
-        .resources().unwrap().key(0)
-        .unwrap().private_key();
+pub fn sign_did_statement(vault: String,password:String, data: &[u8]) ->PyResult<(String,String)>{
+    let (pk,kpub) = deserialize_morpheus(vault, password).unwrap();
+    let private_key = pk
+        .key_by_pk(&kpub).unwrap().private_key();
     let signer = PrivateKeySigner::new(private_key);
     let response = signer.sign(data).unwrap();
     let kpub = response.0;
@@ -123,14 +118,11 @@ pub fn sign_did_statement(phrase: String,password:String, data: &[u8]) ->PyResul
     Ok((signed_data.to_string(),kpub.to_string()))
 }
 
+
 #[pyfunction]
-pub fn sign_witness_statement(phrase: String,password:String,data: &str)->PyResult<String>{
-    let v_password = password.clone();
-    let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
-    morpheus::Plugin::init(&mut vault, v_password).unwrap();
-    let morpheus_plugin = morpheus::Plugin::get(&vault).unwrap();
-    let kpub = morpheus_plugin.public().unwrap().personas().unwrap().key(0).unwrap();
-    let private_key = morpheus_plugin.private(password).unwrap()
+pub fn sign_witness_statement(vault: String,password:String,data: &str)->PyResult<String>{
+    let (pk,kpub) = deserialize_morpheus(vault, password).unwrap();
+    let private_key = pk
         .key_by_pk(&kpub).unwrap().private_key();
     let signer = PrivateKeySigner::new(private_key);
     let statement = get_witness_statement(data).unwrap();
