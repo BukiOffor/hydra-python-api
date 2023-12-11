@@ -31,52 +31,7 @@ class HydraChain:
     
     def __init__(self) -> None:
         pass
-    @classmethod
-    def load_wallets(cls):
-        try:
-            with open(cls.file_path, 'r') as file:
-                wallets = json.load(file)
-                return wallets
-        except FileNotFoundError:
-            print("file does not exists")
-            return []
-
-    def generate_wallet(self, password):
-        phrase = iop.generate_phrase()
-        vault = iop.get_vault(phrase, password)
-        vault = json.loads(vault)
-        home_directory = os.path.expanduser("~")
-        try:
-            with open(home_directory+'/.hydra_wallet', 'r') as file:
-                data = json.load(file)
-                data.append(vault)
-            with open(home_directory+'/.hydra_wallet', 'w') as json_file:
-                json.dump(data, json_file, indent=4)
-            return vault
-        except FileNotFoundError:
-            myvault = []
-            myvault.append(vault)
-            with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
-                json.dump(myvault, json_file, indent=4)
-            return vault
-        
-
-        # with open(home_directory+'/.hydra_wallet', 'a') as json_file:
-        #     json.dump(vault, json_file, indent=4)
-        # return vault
-    
-    def recover_wallet(self,phrase,password):
-        vault = {
-            "phrase": phrase,
-            "password": password,
-        }
-        vault = json.dumps(vault)
-        home_directory = os.path.expanduser("~")
-        f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
-        os.close (f1)
-        with open(home_directory+'/.hydra_wallet', 'a') as file:
-            file.write(vault+"\n")
-        file.close()
+       
     
 
     @classmethod
@@ -97,7 +52,7 @@ class HydraChain:
         if len(file_content) > 0:
             vault = json.loads(file_content[0])
             phrase, password = vault['phrase'],vault['password']
-            _did = iop.generate_did_by_secp_key_id(phrase, password)
+        
             did = iop.generate_did_by_morpheus(phrase, password)
             return(did)
 
@@ -109,7 +64,7 @@ class HydraChain:
         vault = json.loads(file_content[0])
         phrase, password = vault['phrase'],vault['password']
         data = json.dumps(data)
-        signed_statement = iop.sign_witness_statement(phrase, password, data)
+        signed_statement = iop.sign_witness_statement(data)
         return signed_statement
 
     def verify_signed_statement(self,signed_statement):
@@ -172,10 +127,21 @@ class HydraWallet:
     @classmethod
     def get_wallet_address(cls):
         data = cls.load_wallets()
-        data = data[0][0]
+        vault = data[0][0]
+        data = json.dumps(vault)
         addr = iop.get_wallet(data)
         return addr
     
+
+    @classmethod
+    def generate_did(cls,password):
+        file_content = cls.load_wallets()
+        if len(file_content) > 0:
+            vault = file_content[0][1]
+            vault = json.dumps(vault)
+            did = iop.generate_did_by_morpheus(vault, password)
+            return(did)
+
     def recover_wallet(cls,password,phrase):
         vault = cls.generate_wallet(password,phrase)
         return vault

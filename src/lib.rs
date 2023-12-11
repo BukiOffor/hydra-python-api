@@ -17,6 +17,44 @@ use iop_sdk::vault::morpheus::Private;
 use iop_sdk::multicipher::MPublicKey;
 
 
+#[derive(Debug)]
+pub enum Err{
+    CouldNotSendTrsansaction
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct Data {
+    address:String,
+    nonce:String,
+    balance:String,
+    isDelegate:bool,
+    isResigned:bool
+    }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Response {data: Data}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Transactions {
+    transactions: Vec<TransactionData>
+}
+
+
+impl Display for Err {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+impl Error for Err{}
+
+#[derive(Serialize, Debug)]
+struct SendTxnsReq<'a> {
+    transactions: Vec<&'a TransactionData>,
+}
+
+
 
 #[pyfunction]
 #[allow(unused_variables)]
@@ -40,13 +78,10 @@ pub fn get_morpheus_vault(phrase: String, password:String) -> PyResult<String> {
 }
 
 
-
 #[allow(unused)]
 fn deserialize_hydra(data: String, unlock_password:String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
     let vault: Vault = serde_json::from_str(&data).unwrap();
     let params = hydra::Parameters::new(&hyd::Testnet,0);
-    // let wallet = hydra::Plugin::get(&vault, &params).unwrap();
-    //hydra::Plugin::init(&mut vault, &unlock_password, &params).expect("plugin could not be initialised");
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be gotten");
     let wallet_private = wallet.private(&unlock_password)
         .expect("private struct could not be unwrapped")
@@ -135,44 +170,6 @@ pub fn sign_witness_statement(vault: String,password:String,data: &str)->PyResul
 //=================================================MILE STONE TWO ENDS HERE==========================================================
 
 
-#[derive(Debug)]
-pub enum Err{
-    CouldNotSendTrsansaction
-}
-#[derive(Serialize, Deserialize, Debug)]
-#[allow(non_snake_case)]
-pub struct Data {
-    address:String,
-    nonce:String,
-    balance:String,
-    isDelegate:bool,
-    isResigned:bool
-    }
-
-
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Response {data: Data}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Transactions {
-    transactions: Vec<TransactionData>
-}
-
-
-impl Display for Err {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-impl Error for Err{}
-
-#[derive(Serialize, Debug)]
-struct SendTxnsReq<'a> {
-    transactions: Vec<&'a TransactionData>,
-}
-
-
 #[pyfunction]
 #[allow(unused_variables)]
 pub fn generate_transaction<'a>(
@@ -219,7 +216,6 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_wallet, m)?)?;
     m.add_function(wrap_pyfunction!(generate_transaction, m)?)?;   
     m.add_function(wrap_pyfunction!(generate_did_by_morpheus, m)?)?;
-   
     m.add_function(wrap_pyfunction!(sign_did_statement, m)?)?;
     m.add_function(wrap_pyfunction!(sign_witness_statement, m)?)?;
     m.add_function(wrap_pyfunction!(verify_signed_statement, m)?)?;
