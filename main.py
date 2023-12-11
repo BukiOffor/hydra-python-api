@@ -1,4 +1,5 @@
 from hydra import HydraChain, HydraWallet
+import json
 
 
 #implement your logic here
@@ -28,5 +29,17 @@ data = {
   },
   "nonce": chain.generate_nonce(),
 }
+
+
+# sign a witness statement with your did key
+signed_witness_statement = wallet.sign_witness_statement("password",json.dumps(data))
+print(json.loads(signed_witness_statement))
+
+
+# sign a did statement with your did key
+contractStr = "A long legal document, e.g. a contract with all details"
+did_statement = wallet.sign_did_statement(contractStr,"password")
+print(did_statement)
+
 
 

@@ -125,7 +125,7 @@ class HydraWallet:
         return vault
 
     @classmethod
-    def sign_witness_statements(cls,password, data):
+    def sign_witness_statement(cls,password, data):
         file_content = cls.load_wallets()
         if len(file_content) > 0:
             vault = file_content[0][1]
@@ -133,6 +133,21 @@ class HydraWallet:
             signed_statement = iop.sign_witness_statement(vault,password,data)
             return signed_statement      
     
+    @classmethod
+    def sign_did_statement(cls,statement,password):
+        wallet = cls.load_wallets()
+        vault = wallet[0][1]
+        vault = json.dumps(vault)
+        data = bytes(statement, "utf-8")
+        signed_statement = iop.sign_did_statement(vault,password,data)
+        details = {
+            "content": statement,
+            "publicKey": signed_statement[1],
+            "signature": signed_statement[0]
+        }
+        return json.dumps({"Signed contract":details}, indent=4)
+
+
     def get_nonce(cls):
         addr = cls.get_wallet_address()
         url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}"
@@ -144,8 +159,7 @@ class HydraWallet:
         else:
             print("Failed to fetch data. Status code:", response.status_code)   
 
-    
-        
+            
     def sign_transaction(cls,receiver,amount,password):
         nonce = cls.get_nonce()
         vaults = cls.load_wallets()
@@ -212,6 +226,8 @@ class HydraWallet:
         wallets.pop(int(index))
         with open(cls.file_path, 'w') as json_file:
             json.dump(wallets, json_file, indent=2)
+
+    
 
  
 
