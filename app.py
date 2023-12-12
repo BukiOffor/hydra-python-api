@@ -1,121 +1,123 @@
-import tkinter as tk
-from tkinter import messagebox
-from api.hydra import HydraWallet
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from api.hydra import HydraChain, HydraWallet
 import json
 
 
-class BlockchainApp:
-    def __init__(self, master):
-        self.master = master
-        self.master.title("Blockchain App - MILESTONE 2")
+class BlockchainApp(App):
 
+    def build(self):
         self.blockchain = HydraWallet()
         self.wallets = self.get_vaults()
         self.active_acc = 0
         
+        layout = BoxLayout(orientation='vertical')
+
 
         # Milestone 2
-        milestone2_label = tk.Label(master, text="Welcome to your Wallet")
-        milestone2_label.pack(pady=5)
+        milestone2_label = Label(text="Welcome to your Wallet")
+        layout.add_widget(milestone2_label)
 
         # Display Account in Use
 
         address = self.get_state()
-        account_label = tk.Label(master, text=f"Account: {address}")
-        account_label.pack()
+        account_label = Label(text=f"Account: {address}")
+        layout.add_widget(account_label)
 
         # display balance
         wallet = self.get_acc_details()
         if wallet != None:
             balance = self.blockchain.display_address_balance()
-            input_label = tk.Label(master, text=f"Balance: {balance}")
-            input_label.pack()
+            input_label = Label(text=f"Balance: {balance}")
+            layout.add_widget(input_label)
 
 
          #Acoounts Availaible
         acc_num = len(self.wallets)
-        input_label = tk.Label(master, text=f"{acc_num} Accounts Availaible")
-        input_label.pack()
+        input_label = Label(text=f"{acc_num} Accounts Availaible")
+        layout.add_widget(input_label)
 
         # get unlock password from user
-        input_label = tk.Label(master, text="Enter password to create new account: ⬇️")
-        input_label.pack()
-        self.entry_unlock_password = tk.Entry(master, width=40)
-        self.entry_unlock_password.pack(pady=5, padx=40)
-        self.button_generate_wallet = tk.Button(master, text="Generate Mnemonic & Wallet ✅", command=self.generate_wallet) #here
-        self.button_generate_wallet.pack(pady=5)
+        input_label = Label(text="Enter password to create new account: ⬇️")
+        layout.add_widget(input_label)
+        self.entry_unlock_password = TextInput(multiline=False,width=40)
+        layout.add_widget(self.entry_unlock_password)
+        self.button_generate_wallet = Button(text="Generate Mnemonic & Wallet ✅", on_press=self.generate_wallet) #here
+        layout.add_widget(self.button_generate_wallet)
 
         #Mnemonic phrase generated will display in the box below
-        input_label = tk.Label(master, text="The generated 24-word phrase will be shown below: ⬇️")
-        input_label.pack()
-        self.entry_new_address = tk.Entry(master, width=40)
-        self.entry_new_address.pack(pady=5)
+        input_label = Label(text="The generated 24-word phrase will be shown below: ⬇️")
+        layout.add_widget(input_label)
+        self.entry_new_address = TextInput(multiline=True, width=300)
+        layout.add_widget(self.entry_new_address)
 
 
         #Select Account to use
-        # input_label = tk.Label(master, text="Change Account to Use")
+        # input_label = Label(, text="Change Account to Use")
         # input_label.pack()
-        # self.active_num = tk.Entry(master, width=20)
+        # self.active_num = TextInput(, width=20)
         # self.active_num.pack(padx=10,pady=5)
-        # self.button_set_active_account = tk.Button(master, text="swap account", command=self.active_account) #here
+        # self.button_set_active_account = Button(, text="swap account", command=self.active_account) #here
         # self.button_set_active_account.pack(padx=3,pady=3)
 
 
 
         # Generate a persona DID
-        input_label = tk.Label(master, text="Password to generate did ⬇️ ")
-        input_label.pack()
-        self.did_password = tk.Entry(master, width=20)
-        self.did_password.pack(padx=1,pady=1)
-        self.button_generate_persona_did = tk.Button(master, text="Generate Persona DID ✅", command=self.generate_persona_did) #here
-        self.button_generate_persona_did.pack()
-        self.entry_persona_did = tk.Entry(master, width=40)
-        self.entry_persona_did.insert(0, "")
-        self.entry_persona_did.pack()
+        input_label = Label(text="Enter Password to Generate DID: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_password = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_password)
+        self.button_generate_persona_did = Button(text="Generate Persona DID ✅", on_press=self.generate_persona_did)
+        layout.add_widget(self.button_generate_persona_did)
+        self.entry_persona_did = TextInput(multiline=False, width=300)
+        layout.add_widget(self.entry_persona_did)
+        
 
 
         #Delete Account to use
-        input_label = tk.Label(master, text="Enter Index of Account to delete: ⬇️")
-        input_label.pack()
-        self.delete_id = tk.Entry(master, width=20)
-        self.delete_id.pack(padx=1,pady=1)
-        self.button_set_delete_account = tk.Button(master, text="delete account ‼️", command=self.delete_account) #here
-        self.button_set_delete_account.pack(padx=2,pady=2)
+        input_label = Label(text="Enter Index of Account to delete: ⬇️")
+        layout.add_widget(input_label)
+        self.delete_id = TextInput(multiline=False, width=300)
+        layout.add_widget(self.delete_id)
+        self.button_set_delete_account = Button(text="delete account ‼️", on_press=self.delete_account) #here
+        layout.add_widget(self.button_set_delete_account)
 
 
         # Recover the wallet using the 24-word phrase
-        input_label = tk.Label(master, text="Enter 24-word phrase to recover wallet: ⬇️")
-        input_label.pack()
-        self.entry_recover_wallet = tk.Entry(master, width=40)
-        self.entry_recover_wallet.pack()
-        input_label = tk.Label(master, text="Enter password to recover wallet: ⬇️")
-        input_label.pack()
-        self.entry_recover_password = tk.Entry(master, width=40)
-        self.entry_recover_password.pack()
-        self.button_recover_wallet = tk.Button(master, text="Recover Wallet ✅", command=self.recover_wallet) #here
-        self.button_recover_wallet.pack(pady=5)
+        input_label = Label(text="Enter 24-word phrase to recover wallet: ⬇️")
+        layout.add_widget(input_label)
+        self.entry_recover_wallet = TextInput(multiline=False, width=300)
+        layout.add_widget(self.entry_recover_wallet)
+        input_label = Label(text="Enter password to recover wallet: ⬇️")
+        layout.add_widget(input_label)
+        self.entry_recover_password = TextInput(multiline=False, width=300)
+        layout.add_widget(self.entry_recover_password)
+        self.button_recover_wallet = Button(text="Recover Wallet ✅", on_press=self.recover_wallet)
+        layout.add_widget(self.button_recover_wallet)
 
         # Send/Receive Money
-        input_label = tk.Label(master, text="Enter address to send HYD to: ⬇️")
-        input_label.pack(anchor="s")
-        self.entry_send_address = tk.Entry(master, width=40)
-        self.entry_send_address.pack(anchor='s')
-        input_label = tk.Label(master, text="Enter amount to send: ⬇️")
-        input_label.pack(anchor='s')
-        self.entry_send_amount = tk.Entry(master, width=40)
-        self.entry_send_amount.pack(anchor='s')
-        input_label = tk.Label(master, text="Enter wallet password: ⬇️")
-        input_label.pack(anchor='s')
-        self.wallet_password = tk.Entry(master, width=40)
-        self.wallet_password.pack(anchor='s')
-        self.button_send = tk.Button(master, text="Send ✅", command=self.send_hyd) #here
-        self.button_send.pack(anchor='s')
+        input_label = Label(text="Enter address to send HYD to: ⬇️")
+        layout.add_widget(input_label)
+        self.entry_send_address = TextInput(multiline=False, width=300)
+        layout.add_widget(self.entry_send_address)
+        input_label = Label(text="Enter the amount to send: ⬇️")
+        layout.add_widget(input_label)
+        self.entry_send_amount = TextInput(multiline=False, width=300)
+        layout.add_widget(self.entry_send_amount)
+        input_label = Label(text="Enter wallet password: ⬇️")
+        layout.add_widget(input_label)
+        self.wallet_password = TextInput(multiline=False, width=300)
+        layout.add_widget(self.wallet_password)
+        self.button_send = Button(text="Send ✅", on_press=self.send_hyd) #here
+        layout.add_widget(self.button_send)
 
         # Create a Listbox and display transaction history
-        input_label = tk.Label(master, text="Transaction History 🏦")
-        input_label.pack()
-        listbox = tk.Listbox(root, selectmode=tk.MULTIPLE, width=40, height=15)
-        listbox.pack(padx=10, pady=10)
+        input_label = Label(text="Transaction History 🏦")
+        layout.add_widget(input_label)
         address = self.get_state()
         transactions = self.blockchain.get_account_transactions()
         if transactions != None:
@@ -123,30 +125,37 @@ class BlockchainApp:
                 sender, recipient = item['sender'],item['recipient']
                 amount = item['amount']
                 if sender == address:
-                    listbox.insert(tk.END, f"Sent {amount} hyd to {recipient}")
+                    layout.add_widget(Label(text=f"Sent {amount} hyd to {recipient}"))
                 else:
-                    listbox.insert(tk.END, f"Received {amount} hyd from {sender}")
+                    layout.add_widget(Label(text=f"Received {amount} hyd from {sender}"))
+        return layout
 
 
-    def send_hyd(self):
-        address = self.entry_send_address.get()
-        amount = self.entry_send_amount.get()
-        password = self.wallet_password.get()
+    def send_hyd(self,instance):
+        address = self.entry_send_address.text
+        amount = self.entry_send_amount.text
+        password = self.wallet_password.text
         if len(self.wallets) > 0 and address != "" and amount != "" and password != "":    
             txhash = self.blockchain.send_transaction(address, int(amount),password)
-            messagebox.showinfo("Info", f"Transaction was successful\nTransaction ID: {txhash}")
+            popup = Popup(title='Info', content=Label(text=f'Transaction was successful\nTransaction ID: {txhash}'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
         else:
-            messagebox.showerror("Error", "Something went Wrong with your transaction.\n Make sure you filled in the receiptient address, amount and password")
-   
+            popup = Popup(title='Error', content=Label(text='Something went wrong with your transaction.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
 
-    def delete_account(self):
-        delete_id = self.delete_id.get()
+    def delete_account(self,instance):
+        delete_id = self.delete_id.text
         if delete_id != "":
             self.blockchain.delete_account(delete_id)
-            messagebox.showinfo("Info", f"Transaction was successful\nAccount with ID: {delete_id} has been deleted")
+            popup = Popup(title='Info', content=Label(text=f'Transaction was successful\nAccount with ID: {delete_id} has been deleted'),
+                      size_hint=(None, None), size=(400, 200))
+            popup.open()
         else:
-            messagebox.showerror("Error", "Put the index of account you want to delete.")
-
+            popup = Popup(title='Error', content=Label(text='Account index is not specified'),
+                      size_hint=(None, None), size=(400, 200))
+            popup.open()
 
     def get_state(self):
         if len(self.wallets) > 0:
@@ -158,55 +167,77 @@ class BlockchainApp:
             address = self.blockchain.get_wallet_address()
             return address
 
-    def active_account(self):
+    def active_account(self,instance):
         if len(self.wallets) > 0:
-            acc_active = self.active_num.get()
+            acc_active = self.active_num.text
             self.active_num = int(acc_active)
             print(self.active_num)
         else:
-            messagebox.showerror("Error", "You do not have an active wallet.")
+            popup = Popup(title='Error', content=Label(text='You do not have an active wallet.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
 
 
-    def generate_wallet(self):
-        unlock_password = self.entry_unlock_password.get()
+    def generate_wallet(self,instance):
+        unlock_password = self.entry_unlock_password.text
         if unlock_password == '':
-            messagebox.showerror("Error", "Please enter password for your wallet.")
+            popup = Popup(title='Error', content=Label(text='Please enter a password for your wallet.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
             return
         phrase = self.blockchain.generate_phrase()
         resp = self.blockchain.generate_wallet(unlock_password,phrase)
-        self.entry_new_address.insert(0, resp)
+        self.entry_new_address.text = resp
 
-    def generate_persona_did(self):
-        password = self.did_password.get()
+
+    def generate_persona_did(self,instance):
+        password = self.did_password.text
         if len(self.wallets) > 0 and password != "":
             resp = self.blockchain.generate_did(password)
-            self.entry_persona_did.insert(0,resp)
+            self.entry_persona_did.text = resp
         else:
-            messagebox.showerror("Error", "You do not have an active wallet or forgot to put your password")
+            popup = Popup(title='Error', content=Label(text='You do not have an active wallet or no password given.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
 
 
-    def recover_wallet(self):
-        wallet_phrase = self.entry_recover_wallet.get()
-        password = self.entry_recover_password.get()
+    def recover_wallet(self,instance):
+        wallet_phrase = self.entry_recover_wallet.text
+        password = self.entry_recover_password.text
         if wallet_phrase == '' or password == "":
-            messagebox.showerror("Error", "Enter your wallet 24-word phrase and password")
+            popup = Popup(title='Error', content=Label(text='Enter your wallet 24-word phrase and password.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
             return     
         self.blockchain.recover_wallet(password,wallet_phrase)
-        messagebox.showinfo("Wallet Recovered!", "Your wallet has been recovered")
+        popup = Popup(title='Wallet Recovered!', content=Label(text='Your wallet has been recovered.'),
+                      size_hint=(None, None), size=(400, 200))
+        popup.open()
 
-
-    def display_account_transactions(self):
-        if self.check_vault() == False:
-            return
+    # def display_account_transactions(self):
+    #     if self.check_vault() == False:
+    #         return
         
-        if self.blockchain.address == '':
-            messagebox.showerror("Error", "You need to create a vault or address")
-            return
-        address = self.get_state()
-        transactions = self.blockchain.get_account_transactions()
-        
-        messagebox.showinfo("Info", "Under development, Please try again later or wait for update")
+    #     if self.blockchain.address == '':
+    #         popup = Popup(title='Error', content=Label(text='You need to create a vault or address.'),
+    #                       size_hint=(None, None), size=(400, 200))
+    #         popup.open()
+    #         return
+    #     address = self.get_state()
+    #     transactions = self.blockchain.get_account_transactions()
+    #     popup_content = BoxLayout(orientation='vertical')
+    #     for item in transactions:
+    #         sender, recipient = item['sender'], item['recipient']
+    #         amount = item['amount']
+    #         if sender == address:
+    #             popup_content.add_widget(Label(text=f"Sent {amount} hyd to {recipient}"))
+    #         else:
+    #             popup_content.add_widget(Label(text=f"Received {amount} hyd from {sender}"))
 
+    #     popup = Popup(title='Transaction History 🏦', content=popup_content, size_hint=(None, None), size=(400, 300))
+    #     popup.open()
+        
+        
 
     def get_vaults(self):
         try:
@@ -218,6 +249,4 @@ class BlockchainApp:
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = BlockchainApp(root)
-    root.mainloop()
+    BlockchainApp().run()

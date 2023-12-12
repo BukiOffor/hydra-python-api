@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(0, '../api/')
+sys.path.insert(0, './api/')
 import tkinter as tk
 from tkinter import messagebox
 from hydra import HydraWallet
