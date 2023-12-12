@@ -88,9 +88,9 @@ pub fn get_new_acc_on_vault(data:String,unlock_password:String,account:i32) -> P
 }
 
 #[allow(unused)]
-fn deserialize_hydra(data: String, unlock_password:String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
+fn deserialize_hydra(data: String, unlock_password:String, account:i32) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
     let vault: Vault = serde_json::from_str(&data).unwrap();
-    let params = hydra::Parameters::new(&hyd::Testnet,0);
+    let params = hydra::Parameters::new(&hyd::Testnet,account);
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be gotten");
     let wallet_private = wallet.private(&unlock_password)
         .expect("private struct could not be unwrapped")
@@ -182,10 +182,10 @@ pub fn sign_witness_statement(vault: String,password:String,data: &str)->PyResul
 #[pyfunction]
 #[allow(unused_variables)]
 pub fn generate_transaction<'a>(
-    data:String,receiver:String,amount:u64,nonce:u64,password:String
+    data:String,receiver:String,amount:u64,nonce:u64,password:String,account:i32
 ) -> PyResult<String>{
     let mut transactions = Vec::new();
-    let signer = deserialize_hydra(data,password).unwrap();
+    let signer = deserialize_hydra(data,password,account).unwrap();
     let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
     let nonce = nonce +1 ;
     let optional = OptionalTransactionFields{amount, manual_fee:None,vendor_field:None};

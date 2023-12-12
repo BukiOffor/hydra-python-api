@@ -42,11 +42,11 @@ class BlockchainApp(App):
         layout.add_widget(input_label)
 
         # get unlock password from user
-        input_label = Label(text="Enter password to create new account: ⬇️")
+        input_label = Label(text="Enter password to create new Vault: ⬇️")
         layout.add_widget(input_label)
         self.entry_unlock_password = TextInput(multiline=False,width=40)
         layout.add_widget(self.entry_unlock_password)
-        self.button_generate_wallet = Button(text="Generate Mnemonic & Wallet ✅", on_press=self.generate_wallet) #here
+        self.button_generate_wallet = Button(text="Generate Mnemonic & Vault ✅", on_press=self.generate_wallet) #here
         layout.add_widget(self.button_generate_wallet)
 
         #Mnemonic phrase generated will display in the box below
@@ -63,6 +63,18 @@ class BlockchainApp(App):
         # self.active_num.pack(padx=10,pady=5)
         # self.button_set_active_account = Button(, text="swap account", command=self.active_account) #here
         # self.button_set_active_account.pack(padx=3,pady=3)
+
+
+
+        # Generate a account from seed
+        input_label = Label(text="Enter Password to Generate Account from Seed: ⬇️")
+        layout.add_widget(input_label)        
+        self.new_acc_password = TextInput(multiline=False,width=200)
+        layout.add_widget(self.new_acc_password)
+        self.button_generate_new_acc = Button(text="Generate acc from Seed ✅", on_press=self.generate_acc_on_vault)
+        layout.add_widget(self.button_generate_new_acc)
+        self.new_acc_addr = TextInput(multiline=False, width=300)
+        layout.add_widget(self.new_acc_addr)
 
 
 
@@ -195,6 +207,20 @@ class BlockchainApp(App):
         if len(self.wallets) > 0 and password != "":
             resp = self.blockchain.generate_did(password)
             self.entry_persona_did.text = resp
+        else:
+            popup = Popup(title='Error', content=Label(text='You do not have an active wallet or no password given.'),
+                          size_hint=(None, None), size=(400, 200))
+            popup.open()
+
+    def generate_acc_on_vault(self,instance,account=0):
+        password = self.new_acc_password.text
+        if len(self.wallets) > 0 and password != "":
+            resp = self.blockchain.get_new_acc_on_vault(password)
+            data = self.blockchain.load_wallets()
+            vault = data[account][0]
+            new_account = vault['plugins'][-1]['parameters']['account']
+            addr = self.blockchain.get_wallet_address(key=new_account)
+            self.new_acc_addr.text = addr
         else:
             popup = Popup(title='Error', content=Label(text='You do not have an active wallet or no password given.'),
                           size_hint=(None, None), size=(400, 200))

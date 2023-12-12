@@ -175,14 +175,14 @@ class HydraWallet:
             print("Failed to fetch data. Status code:", response.status_code)   
 
             
-    def sign_transaction(cls,receiver,amount,password,account=0):
+    def sign_transaction(cls,receiver,amount,password,account=0,key=0):
         nonce = cls.get_nonce()
         vaults = cls.load_wallets()
         vault = vaults[account][0]
         _params = vault['plugins'][0]['parameters']
         data = json.dumps(vault)
         params = json.dumps(_params)
-        response = iop.generate_transaction(data,receiver,amount,nonce,password)
+        response = iop.generate_transaction(data,receiver,amount,nonce,password,key)
         signed_txs = json.loads(response)
         return signed_txs    
 
