@@ -99,22 +99,37 @@ class HydraWallet:
             return phrase
     
     @classmethod
-    def get_wallet_address(cls):
+    def get_new_acc_on_vault(cls,password, account=0):
         data = cls.load_wallets()
         if len(data) > 0:
-            vault = data[0][0]
+            vault = data[account][0]
+            new_account = vault['plugins'][-1]['parameters']['account']
+            vault_data = json.dumps(vault)
+            new_wallet = iop.get_new_acc_on_vault(vault_data,password,new_account+1)
+            data[account][0] = json.loads(new_wallet)
+            with open(cls.file_path, 'w') as json_file:                
+                json.dump(data, json_file, indent=2)
+            return new_wallet
+
+
+
+    @classmethod
+    def get_wallet_address(cls,account=0,key=0):
+        data = cls.load_wallets()
+        if len(data) > 0:
+            vault = data[account][0]
             _params = vault['plugins'][0]['parameters']
             data = json.dumps(vault)
             params = json.dumps(_params)
-            addr = iop.get_wallet(data)
+            addr = iop.get_wallet(data,key)
             return addr
     
 
     @classmethod
-    def generate_did(cls,password):
+    def generate_did(cls,password,account=0):
         file_content = cls.load_wallets()
         if len(file_content) > 0:
-            vault = file_content[0][1]
+            vault = file_content[account][1]
             vault = json.dumps(vault)
             did = iop.generate_did_by_morpheus(vault, password)
             return(did)
@@ -125,18 +140,18 @@ class HydraWallet:
         return vault
 
     @classmethod
-    def sign_witness_statement(cls,password, data):
+    def sign_witness_statement(cls,password, data,account=0):
         file_content = cls.load_wallets()
         if len(file_content) > 0:
-            vault = file_content[0][1]
+            vault = file_content[account][1]
             vault = json.dumps(vault)
             signed_statement = iop.sign_witness_statement(vault,password,data)
             return signed_statement      
     
     @classmethod
-    def sign_did_statement(cls,statement,password):
+    def sign_did_statement(cls,statement,password,account=0):
         wallet = cls.load_wallets()
-        vault = wallet[0][1]
+        vault = wallet[account][1]
         vault = json.dumps(vault)
         data = bytes(statement, "utf-8")
         signed_statement = iop.sign_did_statement(vault,password,data)
@@ -160,10 +175,10 @@ class HydraWallet:
             print("Failed to fetch data. Status code:", response.status_code)   
 
             
-    def sign_transaction(cls,receiver,amount,password):
+    def sign_transaction(cls,receiver,amount,password,account=0):
         nonce = cls.get_nonce()
         vaults = cls.load_wallets()
-        vault = vaults[0][0]
+        vault = vaults[account][0]
         _params = vault['plugins'][0]['parameters']
         data = json.dumps(vault)
         params = json.dumps(_params)

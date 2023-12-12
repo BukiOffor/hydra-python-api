@@ -79,17 +79,12 @@ pub fn get_morpheus_vault(phrase: String, password:String) -> PyResult<String> {
 
 #[pyfunction]
 #[allow(unused_variables)]
-pub fn get_new_acc_on_vault(data:String,unlock_password:String) -> PyResult<String> {
-    //let mut vec = Vec::new();
+pub fn get_new_acc_on_vault(data:String,unlock_password:String,account:i32) -> PyResult<String> {
     let mut vault: Vault = serde_json::from_str(&data).unwrap();
-    let params = hydra::Parameters::new(&hyd::Testnet,1);
+    let params = hydra::Parameters::new(&hyd::Testnet,account);
     Plugin::create(&mut vault,unlock_password,&params).expect("vault could not be created");
-    // vec.push(vault);
-    // let my_box = Box::new(vec);
     let admin = serde_json::to_string_pretty(&vault).unwrap();    
     Ok(admin)
-
-
 }
 
 #[allow(unused)]
@@ -212,9 +207,9 @@ pub fn generate_transaction<'a>(
 
 #[pyfunction]
 #[allow(unused_variables)]
-pub fn get_wallet(data: String) -> PyResult<String> {
+pub fn get_wallet(data: String, account:i32) -> PyResult<String> {
     let vault: Vault = serde_json::from_str(&data).unwrap();
-    let params = hydra::Parameters::new(&hyd::Testnet,0);
+    let params = hydra::Parameters::new(&hyd::Testnet,account);
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be gotten");
     let wallet_address = wallet.public().unwrap().key_mut(0).unwrap().to_p2pkh_addr();     
     Ok(wallet_address)
