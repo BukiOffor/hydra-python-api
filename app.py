@@ -143,12 +143,12 @@ class BlockchainApp(App):
         return layout
 
 
-    def send_hyd(self,instance):
+    def send_hyd(self,instance,account=0,key=0):
         address = self.entry_send_address.text
         amount = self.entry_send_amount.text
         password = self.wallet_password.text
         if len(self.wallets) > 0 and address != "" and amount != "" and password != "":    
-            txhash = self.blockchain.send_transaction(address, int(amount),password)
+            txhash = self.blockchain.send_transaction(address, int(amount),password,account,key)
             popup = Popup(title='Info', content=Label(text=f'Transaction was successful\nTransaction ID: {txhash}'),
                           size_hint=(None, None), size=(400, 200))
             popup.open()

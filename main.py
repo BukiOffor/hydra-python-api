@@ -1,5 +1,6 @@
 from api.hydra import HydraChain, HydraWallet
 import json
+import requests
 
 
 #implement your logic here
@@ -39,7 +40,9 @@ print(json.loads(signed_witness_statement))
 # sign a did statement with your did key
 contractStr = "A long legal document, e.g. a contract with all details"
 did_statement = wallet.sign_did_statement(contractStr,"password")
-print(did_statement)
+#print(did_statement)
 
-
+url = "https://test.explorer.hydraledger.io:4705/api/v2/wallets/tfqFyjVrUHdRM63LzwJ269vnBP3hD1rKwR"
+response = requests.get(url)
+print(response.json())
 
