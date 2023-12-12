@@ -175,7 +175,7 @@ class HydraWallet:
             print("Failed to fetch data. Status code:", response.status_code)   
 
             
-    def sign_transaction(cls,receiver,amount,password,account=0,key=0):
+    def sign_transaction(cls,receiver,amount,password,account,key):
         nonce = cls.get_nonce()
         vaults = cls.load_wallets()
         vault = vaults[account][0]
@@ -187,9 +187,9 @@ class HydraWallet:
         return signed_txs    
 
     #this function assumes that the wallet has made a transaction before
-    def send_transaction(self,receiver,amount,password):
+    def send_transaction(self,receiver,amount,password,account=0,key=0):
         # Send a GET request to the URL
-        signed_txs = self.sign_transaction(receiver,amount,password)
+        signed_txs = self.sign_transaction(receiver,amount,password,account,key)
         url = "https://test.explorer.hydraledger.io:4705/api/v2/transactions"
         res = requests.post(url, json=signed_txs)
         response = res.json()
