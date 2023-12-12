@@ -1,5 +1,5 @@
 use std::{error::Error, fmt::Display};
-use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner, json_digest::Nonce264, vault::PublicKey};
+use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner, json_digest::Nonce264, vault::{PublicKey, hydra::Plugin}};
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
 use pyo3::prelude::*;
@@ -77,6 +77,20 @@ pub fn get_morpheus_vault(phrase: String, password:String) -> PyResult<String> {
     Ok(admin)
 }
 
+#[pyfunction]
+#[allow(unused_variables)]
+pub fn get_new_acc_on_vault(data:String,unlock_password:String) -> PyResult<String> {
+    //let mut vec = Vec::new();
+    let mut vault: Vault = serde_json::from_str(&data).unwrap();
+    let params = hydra::Parameters::new(&hyd::Testnet,1);
+    Plugin::create(&mut vault,unlock_password,&params).expect("vault could not be created");
+    // vec.push(vault);
+    // let my_box = Box::new(vec);
+    let admin = serde_json::to_string_pretty(&vault).unwrap();    
+    Ok(admin)
+
+
+}
 
 #[allow(unused)]
 fn deserialize_hydra(data: String, unlock_password:String) -> Result<(SecpPrivateKey,SecpPublicKey,SecpKeyId),()> {
@@ -222,6 +236,9 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_nonce, m)?)?;
     m.add_function(wrap_pyfunction!(get_morpheus_vault, m)?)?;
     m.add_function(wrap_pyfunction!(get_hyd_vault, m)?)?;
+    m.add_function(wrap_pyfunction!(get_new_acc_on_vault, m)?)?;
+
+
     
 
 
