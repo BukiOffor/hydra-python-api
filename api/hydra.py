@@ -163,8 +163,8 @@ class HydraWallet:
         return json.dumps({"Signed contract":details}, indent=4)
 
 
-    def get_nonce(cls):
-        addr = cls.get_wallet_address()
+    def get_nonce(cls,key=0):
+        addr = cls.get_wallet_address(key=key)
         url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}"
         response = requests.get(url)
         if response.status_code == 200:
@@ -193,6 +193,7 @@ class HydraWallet:
         url = "https://test.explorer.hydraledger.io:4705/api/v2/transactions"
         res = requests.post(url, json=signed_txs)
         response = res.json()
+        print(response)
         return response
 
 

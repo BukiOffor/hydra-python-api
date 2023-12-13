@@ -94,7 +94,7 @@ fn deserialize_hydra(data: String, unlock_password:String, account:i32) -> Resul
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be gotten");
     let wallet_private = wallet.private(&unlock_password)
         .expect("private struct could not be unwrapped")
-        .key(0)
+        .key_mut(0)
         .expect("private key could not be unwrapped").to_private_key();  
     let wallet_public = wallet.public().unwrap().key(0).unwrap().to_public_key(); 
     let wallet_key_id = wallet.public().unwrap().key(0).unwrap().to_key_id();
