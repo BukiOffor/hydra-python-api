@@ -263,20 +263,26 @@ class HydraWallet:
                         },
                         "address": {
                             "nonce": iop.generate_nonce(),
-                            "value": statement["address"]
+                            "value": {
+                                "country": {
+                                    "nonce": iop.generate_nonce(),
+                                    "value": statement["country"]
+                                },
+                                "city": {
+                                    "nonce": iop.generate_nonce(),
+                                    "value": statement["city"]
+                                },
+                                "street": {
+                                    "nonce": iop.generate_nonce(),
+                                    "value": statement["street"]
+                                },
+                                "zipcode": {
+                                    "nonce": iop.generate_nonce(),
+                                    "value": statement["zipcode"]
+                                }
+                            }
                         },
-                        "country": {
-                            "nonce": iop.generate_nonce(),
-                            "value": statement["country"]
-                        },
-                        "city": {
-                            "nonce": iop.generate_nonce(),
-                            "value": statement["city"]
-                        },
-                        "zipcode": {
-                            "nonce": iop.generate_nonce(),
-                            "value": statement["zipcode"]
-                        }
+                        
                     }
                 },
                 "processId": "cjuQR3pDJeaiRv9oCZ-fBE7T8QWpUGfjP40sAXq0bLwr-8",
