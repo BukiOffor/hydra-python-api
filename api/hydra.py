@@ -47,7 +47,7 @@ class HydraChain:
             data = response.json()  # Assuming the response is in JSON format
             return data['data']
         else:
-            print("Failed to fetch data. Status code:", response.status_code)
+            #print("Failed to fetch data. Status code:", response.status_code)
             return [] 
 
 
@@ -94,7 +94,7 @@ class HydraWallet:
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
-            f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
+            f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o700)
             os.close (f1)
             with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
@@ -221,7 +221,7 @@ class HydraWallet:
             balance = data['data']['balance']
             return balance
         else:
-            print("Failed to fetch data. Status code:", response.status_code) 
+            #print("Failed to fetch data. Status code:", response.status_code) 
             return None 
 
     def get_account_transactions(cls):
@@ -234,7 +234,7 @@ class HydraWallet:
             data = response.json()  # Assuming the response is in JSON format
             return data['data']
         else:
-            print("Failed to fetch data. Status code:", response.status_code)
+            #print("Failed to fetch data. Status code:", response.status_code)
             return [] 
         
 
