@@ -247,7 +247,7 @@ class HydraWallet:
 
     
     @classmethod
-    def generate_statement(cls,name,address,password):
+    def generate_statement(cls,statement,password):
         data = {
                 "claim": {
                     "subject": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
@@ -255,11 +255,27 @@ class HydraWallet:
                         "userId": "5d5d9eda-d3a9-4347-b4ae-b176b75dcf51",
                         "fullName": {
                             "nonce": iop.generate_nonce(),
-                            "value": name
+                            "value": statement['name']
+                        },
+                        "birthDate": {
+                            "nonce": iop.generate_nonce(),
+                            "value": statement["dob"]
                         },
                         "address": {
                             "nonce": iop.generate_nonce(),
-                            "value": address
+                            "value": statement["address"]
+                        },
+                        "country": {
+                            "nonce": iop.generate_nonce(),
+                            "value": statement["country"]
+                        },
+                        "city": {
+                            "nonce": iop.generate_nonce(),
+                            "value": statement["city"]
+                        },
+                        "zipcode": {
+                            "nonce": iop.generate_nonce(),
+                            "value": statement["zipcode"]
                         }
                     }
                 },
@@ -274,8 +290,8 @@ class HydraWallet:
         return data
             
     @classmethod
-    def generate_and_sign_statement(cls,name,address,password):
-        data = cls.generate_statement(name,address,password)
+    def generate_and_sign_statement(cls,statement,password):
+        data = cls.generate_statement(statement,password)
         signed_statement = cls.sign_witness_statement(password,json.dumps(data))
         return signed_statement
             

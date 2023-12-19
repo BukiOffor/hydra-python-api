@@ -8,7 +8,16 @@ wallet = HydraWallet()
 
 
 # sign a witness statement with your did key
-signed_witness_statement = wallet.generate_and_sign_statement("Ebuka Offor","No 3, Samuel Osegbue Cresent","password")
+statement = {
+    "name":"",
+    "address": "",
+    "dob": "",
+    "city": "",
+    "country": "",
+    "zipcode": "",
+    
+}
+signed_witness_statement = wallet.generate_and_sign_statement(statement,"password")
 print(json.loads(signed_witness_statement))
 
 
