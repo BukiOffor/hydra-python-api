@@ -11,6 +11,7 @@ Building a python Api for hydra-ledger blockchain using Maturin and Rust wasm
 
 * Rust
 * Maturin
+* Python > 3.8
 
 Enter the base directory of the project and activate the virtual environment with the following command and install the required python packages.
 
@@ -51,5 +52,5 @@ print(result)
 To spin up the wallet application run the command below in the base directory
 
 ```bash
-source env/bin/activate && python3 app/app.py
+python3 app.py
 ```
