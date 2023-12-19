@@ -94,6 +94,8 @@ class HydraWallet:
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
+            f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o777)
+            os.close (f1)
             with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
             return phrase
@@ -245,10 +247,35 @@ class HydraWallet:
 
     
 
- 
+    def generate_statement(cls, name,address,password):
+        data = {
+                "claim": {
+                    "subject": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
+                    "content": {
+                        "userId": "5d5d9eda-d3a9-4347-b4ae-b176b75dcf51",
+                        "fullName": {
+                            "nonce": iop.generate_nonce(),
+                            "value": name
+                        },
+                        "address": {
+                            "nonce": iop.generate_nonce(),
+                            "value": address
+                        }
+                    }
+                },
+                "processId": "cjuQR3pDJeaiRv9oCZ-fBE7T8QWpUGfjP40sAXq0bLwr-8",
+                "constraints": {
+                    "authority": cls.generate_did(password),
+                    "witness": "uVIc9J4UjKx8tRs6HUEDQElksBCtF9VnHb439boVmB9cw",
+                    "content": None
+                },
+                "nonce": iop.generate_nonce(),
+                }
+        return data
+            
 
-    
-   
+            
+        
 
 
 
