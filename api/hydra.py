@@ -246,8 +246,8 @@ class HydraWallet:
             json.dump(wallets, json_file, indent=2)
 
     
-
-    def generate_statement(cls, name,address,password):
+    @classmethod
+    def generate_statement(cls,name,address,password):
         data = {
                 "claim": {
                     "subject": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
@@ -273,7 +273,11 @@ class HydraWallet:
                 }
         return data
             
-
+    @classmethod
+    def generate_and_sign_statement(cls,name,address,password):
+        data = cls.generate_statement(name,address,password)
+        signed_statement = cls.sign_witness_statement(password,json.dumps(data))
+        return signed_statement
             
         
 
