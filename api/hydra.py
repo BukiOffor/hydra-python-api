@@ -3,8 +3,6 @@ import requests
 import json
 import os
 
-
-
 #https://test.explorer.hydraledger.io/wallets/tdXxhgZV8aAGLL9CCJ4ry9AzTQZzRKqJ97
 
 # ---------------------------------------MileStone 2-----------------------------------------------------
@@ -299,7 +297,22 @@ class HydraWallet:
     def generate_and_sign_statement(cls,statement,password):
         data = cls.generate_statement(statement,password)
         signed_statement = cls.sign_witness_statement(password,json.dumps(data))
-        return signed_statement
+        home_directory = os.path.expanduser("~")
+        try:
+            with open(home_directory+'/.hydra_statements', 'r') as file:
+                data = json.load(file)
+                data.append(signed_statement)
+            with open(home_directory+'/.hydra_statements', 'w') as json_file:
+                json.dump(data, json_file,indent=2)
+            return signed_statement
+        except FileNotFoundError:
+            my_statements = []
+            my_statements.append(signed_statement)
+            f1 = os.open (home_directory+"/.hydra_statements", os.O_CREAT, 0o700)
+            os.close (f1)
+            with open(home_directory+'/.hydra_statements', 'a') as json_file:                
+                json.dump(my_statements, json_file, indent=2)
+            return signed_statement
             
         
 

@@ -127,6 +127,48 @@ class BlockchainApp(App):
         self.button_send = Button(text="Send ✅", on_press=self.send_hyd) #here
         layout.add_widget(self.button_send)
 
+
+        # Generate and sign a did statement
+        input_label = Label(text="Enter password to generate and sign did witness statement: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_password = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_password)
+
+        input_label = Label(text="Enter your name: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_name = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_name)
+
+        input_label = Label(text="Enter date of Birth: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_dob = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_dob)
+
+        input_label = Label(text="Enter Country: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_country = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_country)
+
+        input_label = Label(text="Enter Street: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_street = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_street)
+
+        input_label = Label(text="Enter City: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_city = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_city)
+
+        input_label = Label(text="Enter zipcode: ⬇️")
+        layout.add_widget(input_label)        
+        self.did_zipcode = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_zipcode)
+
+        self.button_generate_and_sign_did = Button(text="Sign Witness Statement ✅", on_press=self.generate_and_sign_statement)
+        layout.add_widget(self.button_generate_and_sign_did)
+        
+        
+
         # Create a Listbox and display transaction history
         input_label = Label(text="Transaction History 🏦")
         layout.add_widget(input_label)
@@ -141,6 +183,22 @@ class BlockchainApp(App):
                 else:
                     layout.add_widget(Label(text=f"Received {amount} hyd from {sender}"))
         return layout
+
+    def generate_and_sign_statement(self,instance):
+        data = {
+            "city" :self.did_city.text,
+            "country" :self.did_country.text,
+            "street" :self.did_street.text,
+            "zipcode" :self.did_zipcode.text,
+            "name" : self.did_name.text,
+            "dob" : self.did_dob.text
+            }
+        password = self.did_password.text
+        response = self.blockchain.generate_and_sign_statement(data,password)
+        pk = json.loads(response)['signature']['publicKey']
+        popup = Popup(title='Info', content=Label(text=f'Transaction was signed with this public key: \n {pk}'),
+                          size_hint=(None, None), size=(400, 200))
+        popup.open()
 
 
     def send_hyd(self,instance,account=0,key=0):
