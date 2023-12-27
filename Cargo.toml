@@ -16,4 +16,5 @@ pyo3-asyncio = { version = "0.20", features = ["attributes", "async-std-runtime"
 async-std = {version = "1.9", features = ["attributes", "tokio1"]}
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = "1.0.108"
+json-digest = "0.0.16"
 #pyo3-async = "0.3.1"

@@ -146,7 +146,9 @@ pub fn generate_did_by_morpheus(data: String,password:String) ->PyResult<String>
 
 #[allow(unused_variables)]
 pub fn get_witness_statement(data: &str)->Result<WitnessStatement,()>{
-    let statement:WitnessStatement = serde_json::from_str(data).unwrap(); 
+    let value = serde_json::from_str(data).unwrap();
+    let digest = json_digest::canonical_json(&value).unwrap();
+    let statement:WitnessStatement = serde_json::from_str(&digest).unwrap(); 
     Ok(statement)
 }
 

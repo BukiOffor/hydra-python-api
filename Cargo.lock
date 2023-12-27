@@ -1288,6 +1288,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "iop-sdk",
+ "json-digest",
  "pyo3",
  "pyo3-asyncio",
  "reqwest",
