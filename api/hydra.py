@@ -43,7 +43,6 @@ class HydraChain:
                 did_doc = json.dumps(data)
                 result = iop.validate_statement_with_did(signed_statement,did_doc)
                 return result
-
         
 
     def generate_nonce(self):
