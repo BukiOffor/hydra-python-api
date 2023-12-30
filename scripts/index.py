@@ -5,6 +5,15 @@ import json
 import time
 
 
+
+url = "https://test.explorer.hydraledger.io:4705/morpheus/v1/did/did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr/document"
+
+response = requests.get(url)
+if response.status_code == 200:
+    data = response.json()
+    print(type(data)) 
+
+
 async def send_transaction(phrase,receiver,amount, nonce):
     res = await iop.send_transaction_with_python(phrase,receiver,amount,nonce)
     return res
