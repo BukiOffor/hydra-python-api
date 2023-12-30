@@ -301,13 +301,13 @@ class HydraWallet:
         try:
             with open(home_directory+'/.hydra_statements', 'r') as file:
                 data = json.load(file)
-                data.append(signed_statement)
+                data.append(signed_statement) #here
             with open(home_directory+'/.hydra_statements', 'w') as json_file:
                 json.dump(data, json_file,indent=2)
             return signed_statement
         except FileNotFoundError:
             my_statements = []
-            my_statements.append(signed_statement)
+            my_statements.append(signed_statement) #here
             f1 = os.open (home_directory+"/.hydra_statements", os.O_CREAT, 0o700)
             os.close (f1)
             with open(home_directory+'/.hydra_statements', 'a') as json_file:                

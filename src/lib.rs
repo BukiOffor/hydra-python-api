@@ -1,5 +1,5 @@
 use std::{error::Error, fmt::Display};
-use iop_sdk::{hydra::TransactionData, morpheus::crypto::SyncMorpheusSigner, json_digest::Nonce264, vault::{PublicKey, hydra::Plugin}};
+use iop_sdk::{hydra::TransactionData, morpheus::{crypto::SyncMorpheusSigner, data::DidDocument}, json_digest::Nonce264, vault::{PublicKey, hydra::Plugin}};
 use serde::{Deserialize, Serialize};
 use iop_sdk::vault::hydra::HydraSigner;
 use pyo3::prelude::*;
@@ -165,6 +165,7 @@ pub fn sign_did_statement(vault: String,password:String, data: &[u8]) ->PyResult
 }
 
 
+
 #[pyfunction]
 pub fn sign_witness_statement(vault: String,password:String,data: &str)->PyResult<String>{
     let (pk,kpub) = deserialize_morpheus(vault, password).unwrap();
@@ -178,7 +179,7 @@ pub fn sign_witness_statement(vault: String,password:String,data: &str)->PyResul
 
 }
 
-//=================================================MILE STONE TWO ENDS HERE==========================================================
+//================================================= MILE STONE TWO ENDS HERE ==========================================================
 
 
 #[pyfunction]
@@ -218,6 +219,16 @@ pub fn get_wallet(data: String, account:i32) -> PyResult<String> {
 }
 
 
+#[pyfunction]
+pub fn validate_statement_with_did(data: &str, doc:&str)->PyResult<String>{
+    let did_doc:DidDocument = serde_json::from_str(doc).unwrap();
+    let statement:Signed<WitnessStatement> = serde_json::from_str(data).unwrap(); 
+    let response = statement.validate_with_did_doc(&did_doc,None,None)
+        .expect("Validation could not be ascertained");
+    let data = serde_json::to_string(&response).unwrap();
+    Ok(data)
+}
+
 
 
 /// A Python module implemented in Rust.
@@ -234,9 +245,7 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_morpheus_vault, m)?)?;
     m.add_function(wrap_pyfunction!(get_hyd_vault, m)?)?;
     m.add_function(wrap_pyfunction!(get_new_acc_on_vault, m)?)?;
-
-
-    
+    m.add_function(wrap_pyfunction!(validate_statement_with_did, m)?)?;
 
 
 
