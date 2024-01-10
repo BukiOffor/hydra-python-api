@@ -30,19 +30,19 @@ class HydraChain:
     def __init__(self) -> None:
         pass
 
-    def verify_signed_statement(self,signed_statement,without_did=True):
-        if without_did == True:
-            result = iop.verify_signed_statement(signed_statement)
+    def verify_signed_statement(self,signed_statement):
+        result = iop.verify_signed_statement(signed_statement)
+        return result
+        
+    def verify_statement_with_did(self, signed_statement):
+        did = json.loads(signed_statement)['content']['claim']['subject']
+        url = f"https://test.explorer.hydraledger.io:4705/morpheus/v1/did/{did}/document"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()  # Assuming the response is in JSON format
+            did_doc = json.dumps(data)
+            result = iop.validate_statement_with_did(signed_statement,did_doc)
             return result
-        else:
-            did = json.loads(signed_statement)['content']['claim']['subject']
-            url = f"https://test.explorer.hydraledger.io:4705/morpheus/v1/did/{did}/document"
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()  # Assuming the response is in JSON format
-                did_doc = json.dumps(data)
-                result = iop.validate_statement_with_did(signed_statement,did_doc)
-                return result
         
 
     def generate_nonce(self):
