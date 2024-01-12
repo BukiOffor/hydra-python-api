@@ -27,7 +27,7 @@ jobs:
       #     buildozer_version: stable
       - name: Build with Buildozer
         run: |
-          pip3 install --user --upgrade buildozer Cython virtualenv
+          python -m pip install --user --upgrade buildozer Cython virtualenv
           export PATH=$PATH:~/.local/bin/
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
           export BUILDOZER_WARN_ON_ROOT=0
