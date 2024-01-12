@@ -12,7 +12,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: |
           pip install maturin
-          python3 -m venv myvenv
+          python3 -m venv env
           source env/bin/activate
           maturin develop
 
