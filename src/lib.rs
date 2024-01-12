@@ -16,7 +16,7 @@ use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt::Display};
 
-use pyo3::exceptions;
+//use pyo3::exceptions;
 use pyo3::panic::PanicException;
 //use iop_sdk::multicipher::MKeyId;
 //use iop_sdk::vault::{PrivateKey,Network,};
