@@ -42,15 +42,15 @@ class BlockchainApp(App):
         layout.add_widget(input_label)
 
         # get unlock password from user
-        input_label = Label(text="Enter password to create new Vault: ⬇️")
+        input_label = Label(text="Enter password to create new Vault:")
         layout.add_widget(input_label)
         self.entry_unlock_password = TextInput(multiline=False,width=40)
         layout.add_widget(self.entry_unlock_password)
-        self.button_generate_wallet = Button(text="Generate Mnemonic & Vault ✅", on_press=self.generate_wallet) #here
+        self.button_generate_wallet = Button(text="Generate Mnemonic & Vault", on_press=self.generate_wallet) #here
         layout.add_widget(self.button_generate_wallet)
 
         #Mnemonic phrase generated will display in the box below
-        input_label = Label(text="The generated 24-word phrase will be shown below: ⬇️")
+        input_label = Label(text="The generated 24-word phrase will be shown below: ")
         layout.add_widget(input_label)
         self.entry_new_address = TextInput(multiline=True, width=300)
         layout.add_widget(self.entry_new_address)
@@ -67,11 +67,11 @@ class BlockchainApp(App):
 
 
         # Generate a account from seed
-        input_label = Label(text="Enter Password to Generate Account from Seed: ⬇️")
+        input_label = Label(text="Enter Password to Generate Account from Seed: ")
         layout.add_widget(input_label)        
         self.new_acc_password = TextInput(multiline=False,width=200)
         layout.add_widget(self.new_acc_password)
-        self.button_generate_new_acc = Button(text="Generate acc from Seed ✅", on_press=self.generate_acc_on_vault)
+        self.button_generate_new_acc = Button(text="Generate acc from Seed ", on_press=self.generate_acc_on_vault)
         layout.add_widget(self.button_generate_new_acc)
         self.new_acc_addr = TextInput(multiline=False, width=300)
         layout.add_widget(self.new_acc_addr)
@@ -79,11 +79,11 @@ class BlockchainApp(App):
 
 
         # Generate a persona DID
-        input_label = Label(text="Enter Password to Generate DID: ⬇️")
+        input_label = Label(text="Enter Password to Generate DID: ")
         layout.add_widget(input_label)        
         self.did_password = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_password)
-        self.button_generate_persona_did = Button(text="Generate Persona DID ✅", on_press=self.generate_persona_did)
+        self.button_generate_persona_did = Button(text="Generate Persona DID ", on_press=self.generate_persona_did)
         layout.add_widget(self.button_generate_persona_did)
         self.entry_persona_did = TextInput(multiline=False, width=300)
         layout.add_widget(self.entry_persona_did)
@@ -91,7 +91,7 @@ class BlockchainApp(App):
 
 
         #Delete Account to use
-        input_label = Label(text="Enter Index of Account to delete: ⬇️")
+        input_label = Label(text="Enter Index of Account to delete: ")
         layout.add_widget(input_label)
         self.delete_id = TextInput(multiline=False, width=300)
         layout.add_widget(self.delete_id)
@@ -100,77 +100,77 @@ class BlockchainApp(App):
 
 
         # Recover the wallet using the 24-word phrase
-        input_label = Label(text="Enter 24-word phrase to recover wallet: ⬇️")
+        input_label = Label(text="Enter 24-word phrase to recover wallet: ")
         layout.add_widget(input_label)
         self.entry_recover_wallet = TextInput(multiline=False, width=300)
         layout.add_widget(self.entry_recover_wallet)
-        input_label = Label(text="Enter password to recover wallet: ⬇️")
+        input_label = Label(text="Enter password to recover wallet: ")
         layout.add_widget(input_label)
         self.entry_recover_password = TextInput(multiline=False, width=300)
         layout.add_widget(self.entry_recover_password)
-        self.button_recover_wallet = Button(text="Recover Wallet ✅", on_press=self.recover_wallet)
+        self.button_recover_wallet = Button(text="Recover Wallet ", on_press=self.recover_wallet)
         layout.add_widget(self.button_recover_wallet)
 
         # Send/Receive Money
-        input_label = Label(text="Enter address to send HYD to: ⬇️")
+        input_label = Label(text="Enter address to send HYD to: ")
         layout.add_widget(input_label)
         self.entry_send_address = TextInput(multiline=False, width=300)
         layout.add_widget(self.entry_send_address)
-        input_label = Label(text="Enter the amount to send: ⬇️")
+        input_label = Label(text="Enter the amount to send: ")
         layout.add_widget(input_label)
         self.entry_send_amount = TextInput(multiline=False, width=300)
         layout.add_widget(self.entry_send_amount)
-        input_label = Label(text="Enter wallet password: ⬇️")
+        input_label = Label(text="Enter wallet password: ")
         layout.add_widget(input_label)
         self.wallet_password = TextInput(multiline=False, width=300)
         layout.add_widget(self.wallet_password)
-        self.button_send = Button(text="Send ✅", on_press=self.send_hyd) #here
+        self.button_send = Button(text="Send ", on_press=self.send_hyd) #here
         layout.add_widget(self.button_send)
 
 
         # Generate and sign a did statement
-        input_label = Label(text="Enter password to generate and sign did witness statement: ⬇️")
+        input_label = Label(text="Enter password to generate and sign did witness statement: ")
         layout.add_widget(input_label)        
         self.did_password = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_password)
 
-        input_label = Label(text="Enter your name: ⬇️")
+        input_label = Label(text="Enter your name: ")
         layout.add_widget(input_label)        
         self.did_name = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_name)
 
-        input_label = Label(text="Enter date of Birth: ⬇️")
+        input_label = Label(text="Enter date of Birth: ")
         layout.add_widget(input_label)        
         self.did_dob = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_dob)
 
-        input_label = Label(text="Enter Country: ⬇️")
+        input_label = Label(text="Enter Country: ")
         layout.add_widget(input_label)        
         self.did_country = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_country)
 
-        input_label = Label(text="Enter Street: ⬇️")
+        input_label = Label(text="Enter Street: ")
         layout.add_widget(input_label)        
         self.did_street = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_street)
 
-        input_label = Label(text="Enter City: ⬇️")
+        input_label = Label(text="Enter City: ")
         layout.add_widget(input_label)        
         self.did_city = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_city)
 
-        input_label = Label(text="Enter zipcode: ⬇️")
+        input_label = Label(text="Enter zipcode: ")
         layout.add_widget(input_label)        
         self.did_zipcode = TextInput(multiline=False,width=200)
         layout.add_widget(self.did_zipcode)
 
-        self.button_generate_and_sign_did = Button(text="Sign Witness Statement ✅", on_press=self.generate_and_sign_statement)
+        self.button_generate_and_sign_did = Button(text="Sign Witness Statement ", on_press=self.generate_and_sign_statement)
         layout.add_widget(self.button_generate_and_sign_did)
         
         
 
         # Create a Listbox and display transaction history
-        input_label = Label(text="Transaction History 🏦")
+        input_label = Label(text="Transaction History ")
         layout.add_widget(input_label)
         address = self.get_state()
         transactions = self.blockchain.get_account_transactions()
