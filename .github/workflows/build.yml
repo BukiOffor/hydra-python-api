@@ -8,13 +8,13 @@ jobs:
     name: Build for Android
     runs-on: ubuntu-latest
     steps:
-      # - uses: actions/checkout@v4
-      # - uses: actions-rust-lang/setup-rust-toolchain@v1
-      # - run: |
-      #     pip install maturin
-      #     python3 -m venv env
-      #     source env/bin/activate
-      #     maturin develop
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: |
+          pip install maturin
+          python3 -m venv env
+          source env/bin/activate
+          maturin develop
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,8 +40,6 @@ jobs:
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
           cd ${{ github.workspace }}
-          python3 -m venv env
-          source env/bin/activate
           buildozer android debug
 
       - name: Upload artifacts
