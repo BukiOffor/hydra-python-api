@@ -1,5 +1,6 @@
 altgraph==0.17.4
 appdirs==1.4.4
+asyncio==3.4.3
 build==1.0.3
 buildozer==1.5.0
 certifi==2023.11.17
@@ -10,6 +11,7 @@ distlib==0.3.7
 docutils==0.20.1
 filelock==3.13.1
 idna==3.6
+iop-python @ file:///var/folders/6q/rzldc14j20j2z0b5xrw_vcg40000gn/T/.tmpta5mQd/iop_python-0.1.0-cp310-cp310-macosx_10_12_x86_64.whl
 Jinja2==3.1.2
 Kivy==2.2.1
 Kivy-Garden==0.1.5

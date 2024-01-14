@@ -33,6 +33,7 @@ jobs:
       #     buildozer_version: stable
       - name: Build with Buildozer
         run: |
+          pip install iop_python-0.1.0-cp310-cp310-macosx_10_12_x86_64.whl
           python -m pip install --upgrade buildozer Cython==0.29.33 virtualenv
           export PATH=$PATH:~/.local/bin/
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
