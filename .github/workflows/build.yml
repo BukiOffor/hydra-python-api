@@ -18,6 +18,10 @@ jobs:
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
           cargo install cargo-apk
+          cd ${{ github.workspace }}
+          cargo apk build
+
+          
         # python -m pip install --upgrade buildozer Cython==0.29.33 virtualenv
         # export PATH=$PATH:~/.local/bin/
         # export APP_ANDROID_ACCEPT_SDK_LICENSE=1
