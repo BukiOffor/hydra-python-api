@@ -11,15 +11,22 @@ jobs:
 
     steps:
       
-      - uses: actions/checkout@v4
-      - name: Setup JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: temurin
+      # - uses: actions/checkout@v4
+      # - name: Setup JDK 17
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     java-version: 17
+      #     distribution: temurin
       
-      - name: Setup Android SDK
-        uses: amyu/setup-android@v4
+      # - name: Setup Android SDK
+      #   uses: amyu/setup-android@v4
+
+      - uses: maxim-lobanov/setup-android-tools@v1
+        with:
+          packages: |
+            platforms;android-29
+            platforms;android-30
+            system-images;android-30;google_apis;x86
       
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
