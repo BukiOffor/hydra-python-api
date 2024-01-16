@@ -11,6 +11,12 @@ jobs:
 
     steps:
       
+      - uses: maxim-lobanov/setup-android-tools@v1
+        with:
+          packages: |
+            platforms;android-29
+            platforms;android-30
+            system-images;android-30;google_apis;x86
 
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
