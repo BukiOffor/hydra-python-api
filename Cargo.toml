@@ -9,6 +9,9 @@ name = "iop_python"
 crate-type = ["cdylib"]
 
 [dependencies]
+[target.'cfg(target_os = "android")']
+rustflags = ["-C", "link-arg=-s"]
+
 pyo3 = { version = "0.20", features = ["extension-module"] }
 iop-sdk = "0.0.16"
 reqwest = { version = "0.11.22", features = ["json"] }
