@@ -13,13 +13,14 @@ jobs:
       
       - name: Install Android Sdk 
         run: |  
+           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
            sudo add-apt-repository ppa:openjdk-r/ppa
            sudo apt-get update
            sudo apt-get install openjdk-8-jdk
            wget https://dl.google.com/android/repository/tools_r25.2.3-linux.zip
            unzip tools_r25.2.3-linux.zip -d sdk
            cd sdk/tools
-           ./android update sdk --no-ui
+           ./android update sdk --no-ui -y
            export ANDROID_HOME=$HOME/sdk
            export PATH=${PATH}:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/build-tools/26.0.0-preview/
            sudo apt-get install libc6:i386 libstdc++6:i386
