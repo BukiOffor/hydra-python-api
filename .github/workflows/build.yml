@@ -20,7 +20,7 @@ jobs:
            wget https://dl.google.com/android/repository/tools_r25.2.3-linux.zip
            unzip tools_r25.2.3-linux.zip -d sdk
            cd sdk/tools
-           ./android update sdk --no-ui -y
+           ./android update sdk --no-ui 
            export ANDROID_HOME=$HOME/sdk
            export PATH=${PATH}:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/build-tools/26.0.0-preview/
            sudo apt-get install libc6:i386 libstdc++6:i386
