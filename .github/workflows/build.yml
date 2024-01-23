@@ -11,36 +11,24 @@ jobs:
 
     steps:
       
-      - name: Install Android Sdk 
-        run: |  
-           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-           sudo apt-get update
-           sudo apt-get install libc6-dev-i386 lib32z1 openjdk-30-jdk           
-
-
-      
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: |
-          sudo apt update
-          cargo install cargo-apk
-          cd ${{ github.workspace }}
-          cargo apk build
+      # - uses: actions/checkout@v4
+      # - uses: actions-rust-lang/setup-rust-toolchain@v1
+      # - run: |
+      #     sudo apt update
+      #     cargo install cargo-apk
+      #     cd ${{ github.workspace }}
+      #     cargo apk build
 
           
-        # python -m pip install --upgrade buildozer Cython==0.29.33 virtualenv
-        # export PATH=$PATH:~/.local/bin/
-        # export APP_ANDROID_ACCEPT_SDK_LICENSE=1
-        # export BUILDOZER_WARN_ON_ROOT=0
 
 
       - name: Checkout
         uses: actions/checkout@v2
 
-      # - name: Upgrade Cython
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: '3.8'
+      - name: Upgrade Cython
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
     
       # - name: Build with Buildozer
       #   uses: ArtemSBulgakov/buildozer-action@v1
@@ -49,17 +37,19 @@ jobs:
       #     command: buildozer android debug
       #     # workdir: <specify the directory of the app no don't mention this the app files are in root directory>
       #     buildozer_version: stable
-      # - name: Build with Buildozer
-      #   run: |  
-      #     sudo apt update
-      #     sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-      #     python -m pip install --upgrade buildozer Cython==0.29.33 virtualenv
-      #     pip install iop_python
-      #     export PATH=$PATH:~/.local/bin/
-      #     export APP_ANDROID_ACCEPT_SDK_LICENSE=1
-      #     export BUILDOZER_WARN_ON_ROOT=0
-      #     cd ${{ github.workspace }}
-      #     buildozer android debug
+
+      
+      - name: Build with Buildozer
+        run: |  
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          python -m pip install --upgrade buildozer Cython==0.29.33 virtualenv
+          export PATH=$PATH:~/.local/bin/
+          export APP_ANDROID_ACCEPT_SDK_LICENSE=1
+          export BUILDOZER_WARN_ON_ROOT=0
+          cd ${{ github.workspace }}
+          buildozer android debug
+
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
