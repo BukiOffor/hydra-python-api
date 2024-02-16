@@ -25,7 +25,7 @@ jobs:
           cargo install cargo-ndk
           rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android 
           cd ${{ github.workspace }}
-          cargo ndk -t aarch64-linux-android 
+          cargo-ndk -t aarch64-linux-android 
 
 
       - name: Upload artifacts
