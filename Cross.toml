@@ -1,0 +1,14 @@
+[build]
+xargo = true
+build-std = true
+default-target = "aarch64-linux-android"
+pre-build = ["apt-get update"] # can also be the path to a file to run
+
+
+[target.aarch64-linux-android]
+xargo = false
+build-std = false
+zig = "2.17"
+image = "test-image"
+pre-build = ["apt-get update"] # can also be the path to a file to run
+runner = "custom-runner"
