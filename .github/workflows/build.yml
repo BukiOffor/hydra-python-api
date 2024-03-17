@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - "mobile"
-
+      - "main"
 jobs:
 # Build job. Builds app for Android with Buildozer
   build-android:
