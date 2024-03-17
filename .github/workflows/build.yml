@@ -1,6 +1,8 @@
 name: Build
 on:
   push:
+    branches:
+      - "mobile"
 
 jobs:
 # Build job. Builds app for Android with Buildozer
