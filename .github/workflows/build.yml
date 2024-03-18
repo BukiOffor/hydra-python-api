@@ -1,23 +1,16 @@
-name: Build APK
-on: [push,pull_request]
+name: Clear all Github actions caches on sundays
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
 
 jobs:
-  build-android:
-    name: Build for Android
+  my-job:
+    name: Delete all caches
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build with Buildozer
-        run: |
-          pip3 install --user --upgrade buildozer
-          sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-          pip3 install --upgrade Cython==0.29.33 virtualenv
-          cd ${{ github.workspace }}
-          buildozer android debug
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+      - name: Clear caches
+        uses: easimon/wipe-cache@main
         with:
-          name: package
-          path: bin/*.apk
+          dry-run: 'true'
