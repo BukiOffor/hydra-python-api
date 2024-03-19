@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = Hydra Wallet
 
 # (str) Package name
 package.name = mykivyapp

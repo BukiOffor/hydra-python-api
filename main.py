@@ -7,7 +7,7 @@ from kivy.uix.popup import Popup
 from api.hydra import HydraWallet
 import json
 from kivy import platform
-
+import os
 
 class BlockchainApp(App):
     def on_start(self):
@@ -18,7 +18,15 @@ class BlockchainApp(App):
                 [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
             
     def build(self):
-        self.blockchain = HydraWallet()
+        file_path = ""
+        if platform == "android":
+             from android.storage import app_storage_path, primary_external_storage_path, secondary_external_storage_path
+             file_path = os.path.join( primary_external_storage_path(),'.hydra_wallet')
+        else:
+            home_directory = os.path.expanduser("~")
+            file_path = home_directory+"/.hydra_wallet"
+        print(file_path)
+        self.blockchain = HydraWallet(file_path)
         self.wallets = self.get_vaults()
         self.active_acc = 0
         

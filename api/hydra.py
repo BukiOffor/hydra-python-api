@@ -64,14 +64,13 @@ class HydraChain:
 
 class HydraWallet:
 
-    home_directory = os.path.expanduser("~")
-    file_path = home_directory+"/.hydra_wallet"
+    # home_directory = os.path.expanduser("~")
+    # file_path = home_directory+"/.hydra_wallet"
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, path):
+        self.file_path = path
 
-    @classmethod
-    def generate_nonce(cls):
+    def generate_nonce(self):
         nonce = requests.get(api+"/api/generate_nonce").json()
         return nonce
 
@@ -79,18 +78,16 @@ class HydraWallet:
        phrase = requests.get(api+"/api/generate_phrase").json()
        return phrase
     
-    @classmethod
-    def load_wallets(cls):
+    def load_wallets(self):
         try:
-            with open(cls.file_path, 'r') as json_file:
+            with open(self.file_path, 'r') as json_file:
                 wallets = json.load(json_file)
                 return wallets
         except FileNotFoundError:
             print("user does not own any wallets")
             return []
         
-    @classmethod
-    def generate_wallet(cls, password,phrase):
+    def generate_wallet(self, password,phrase):
         hyd_vault = requests.post(api+"/api/get_hyd_vault", json={"password":password,"phrase":phrase}).json()
         morpheus_vault = requests.post(api+"/api/get_morpheus_vault", json={"password":password,"phrase":phrase}).json()
         h_vault = json.loads(hyd_vault)
@@ -98,54 +95,50 @@ class HydraWallet:
         vaults = []
         vaults.append(h_vault) 
         vaults.append(m_vault)
-        home_directory = os.path.expanduser("~")
         try:
-            with open(cls.file_path, 'r') as file:
+            with open(self.file_path, 'r') as file:
                 data = json.load(file)
                 data.append(vaults)
-            with open(home_directory+'/.hydra_wallet', 'w') as json_file:
+            with open(self.file_path, 'w') as json_file:
                 json.dump(data, json_file,indent=2)
             return phrase
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
-            f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o700)
+            f1 = os.open (self.file_path, os.O_CREAT, 0o700)
             os.close (f1)
-            with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
+            with open(self.file_path, 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
             return phrase
     
-    @classmethod
-    def get_new_acc_on_vault(cls,password, account=0):
-        data = cls.load_wallets()
+    def get_new_acc_on_vault(self,password, account=0):
+        data = self.load_wallets()
         if len(data) > 0:
             vault = data[account][0]
             new_account = vault['plugins'][-1]['parameters']['account']
             vault_data = json.dumps(vault)
             new_wallet = requests.post(api+"/api/get_new_acc_on_vault", json={"vault":vault_data,"password":password,"account": new_account+1}).json()
             data[account][0] = json.loads(new_wallet)
-            with open(cls.file_path, 'w') as json_file:                
+            with open(self.file_path, 'w') as json_file:                
                 json.dump(data, json_file, indent=2)
             return new_wallet
 
 
 
-    @classmethod
-    def get_wallet_address(cls,account=0,key=0):
-        data = cls.load_wallets()
+    def get_wallet_address(self,account=0,key=0):
+        data = self.load_wallets()
         if len(data) > 0:
             vault = data[account][0]
             _params = vault['plugins'][0]['parameters']
             data = json.dumps(vault)
             params = json.dumps(_params)
-            print(data)
+            #print(data)
             addr = requests.post(api+"/api/get_wallet", json={"data":data,"account":str(key)}).json()
             return addr
     
 
-    @classmethod
-    def generate_did(cls,password,account=0):
-        file_content = cls.load_wallets()
+    def generate_did(self,password,account=0):
+        file_content = self.load_wallets()
         if len(file_content) > 0:
             vault = file_content[account][1]
             vault = json.dumps(vault)
@@ -154,13 +147,12 @@ class HydraWallet:
             return(did)
 
 
-    def recover_wallet(cls,password,phrase):
-        vault = cls.generate_wallet(password,phrase)
+    def recover_wallet(self,password,phrase):
+        vault = self.generate_wallet(password,phrase)
         return vault
 
-    @classmethod
-    def sign_witness_statement(cls,password, data,account=0):
-        file_content = cls.load_wallets()
+    def sign_witness_statement(self,password, data,account=0):
+        file_content = self.load_wallets()
         if len(file_content) > 0:
             vault = file_content[account][1]
             vault = json.dumps(vault)
@@ -168,9 +160,8 @@ class HydraWallet:
             signed_statement = requests.post(api+"/api/sign_witness_statement", json={"vault":vault, "password":password, "data":data}).json()
             return signed_statement      
     
-    @classmethod
-    def sign_did_statement(cls,statement,password,account=0):
-        wallet = cls.load_wallets()
+    def sign_did_statement(self,statement,password,account=0):
+        wallet = self.load_wallets()
         vault = wallet[account][1]
         vault = json.dumps(vault)
         data = bytes(statement, "utf-8")
@@ -184,8 +175,8 @@ class HydraWallet:
         return json.dumps({"Signed contract":details}, indent=4)
 
 
-    def get_nonce(cls,key=0):
-        addr = cls.get_wallet_address(key=key)
+    def get_nonce(self,key=0):
+        addr = self.get_wallet_address(key=key)
         url = f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}"
         response = requests.get(url)
         if response.status_code == 200:
@@ -196,9 +187,9 @@ class HydraWallet:
             print("Failed to fetch data. Status code:", response.status_code)   
 
             
-    def sign_transaction(cls,receiver,amount,password,account,key):
-        nonce = cls.get_nonce()
-        vaults = cls.load_wallets()
+    def sign_transaction(self,receiver,amount,password,account,key):
+        nonce = self.get_nonce()
+        vaults = self.load_wallets()
         vault = vaults[account][0]
         _params = vault['plugins'][0]['parameters']
         data = json.dumps(vault)
@@ -216,7 +207,7 @@ class HydraWallet:
         url = "https://test.explorer.hydraledger.tech:4705/api/v2/transactions"
         res = requests.post(url, json=signed_txs)
         response = res.json()
-        print(response)
+        #print(response)
         return response
 
 
@@ -231,9 +222,8 @@ class HydraWallet:
         time = response['data']['timestamp']['human']          
         return f"Transaction with id {txid} was sent successfully at {time} with a fee of {fee} Hyd and has {confirmations} confirmations"
 
-    @classmethod   
-    def display_address_balance(cls):
-        addr = cls.get_wallet_address()
+    def display_address_balance(self):
+        addr = self.get_wallet_address()
         if addr == None:
             return None
         response = requests.get(f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}")
@@ -245,8 +235,8 @@ class HydraWallet:
             #print("Failed to fetch data. Status code:", response.status_code) 
             return None 
 
-    def get_account_transactions(cls):
-        addr = cls.get_wallet_address()
+    def get_account_transactions(self):
+        addr = self.get_wallet_address()
         if addr == None:
             return None
         url = f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}/transactions"
@@ -259,46 +249,45 @@ class HydraWallet:
             return [] 
         
 
-    @classmethod
-    def delete_account(cls,index):
-        wallets = cls.load_wallets()
+    def delete_account(self,index):
+        wallets = self.load_wallets()
         wallets.pop(int(index))
-        with open(cls.file_path, 'w') as json_file:
+        with open(self.file_path, 'w') as json_file:
             json.dump(wallets, json_file, indent=2)
 
     
     @classmethod
-    def generate_statement(cls,statement,password):
+    def generate_statement(self,statement,password):
         data = {
                 "claim": {
                     "subject": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
                     "content": {
                         "userId": "5d5d9eda-d3a9-4347-b4ae-b176b75dcf51",
                         "fullName": {
-                            "nonce": cls.generate_nonce(),
+                            "nonce": self.generate_nonce(),
                             "value": statement['name']
                         },
                         "birthDate": {
-                            "nonce": cls.generate_nonce(),
+                            "nonce": self.generate_nonce(),
                             "value": statement["dob"]
                         },
                         "address": {
-                            "nonce": cls.generate_nonce(),
+                            "nonce": self.generate_nonce(),
                             "value": {
                                 "country": {
-                                    "nonce": cls.generate_nonce(),
+                                    "nonce": self.generate_nonce(),
                                     "value": statement["country"]
                                 },
                                 "city": {
-                                    "nonce": cls.generate_nonce(),
+                                    "nonce": self.generate_nonce(),
                                     "value": statement["city"]
                                 },
                                 "street": {
-                                    "nonce": cls.generate_nonce(),
+                                    "nonce": self.generate_nonce(),
                                     "value": statement["street"]
                                 },
                                 "zipcode": {
-                                    "nonce": cls.generate_nonce(),
+                                    "nonce": self.generate_nonce(),
                                     "value": statement["zipcode"]
                                 }
                             }
@@ -308,32 +297,31 @@ class HydraWallet:
                 },
                 "processId": "cjuQR3pDJeaiRv9oCZ-fBE7T8QWpUGfjP40sAXq0bLwr-8",
                 "constraints": {
-                    "authority": cls.generate_did(password),
+                    "authority": self.generate_did(password),
                     "witness": "uVIc9J4UjKx8tRs6HUEDQElksBCtF9VnHb439boVmB9cw",
                     "content": None
                 },
-                "nonce": cls.generate_nonce(),
+                "nonce": self.generate_nonce(),
                 }
         return data
             
     @classmethod
-    def generate_and_sign_statement(cls,statement,password):
-        data = cls.generate_statement(statement,password)
-        signed_statement = cls.sign_witness_statement(password,json.dumps(data))
-        home_directory = os.path.expanduser("~")
+    def generate_and_sign_statement(self,statement,password):
+        data = self.generate_statement(statement,password)
+        signed_statement = self.sign_witness_statement(password,json.dumps(data))
         try:
-            with open(home_directory+'/.hydra_statements', 'r') as file:
+            with open(self.file_path, 'r') as file:
                 data = json.load(file)
                 data.append(json.loads(signed_statement)) #here
-            with open(home_directory+'/.hydra_statements', 'w') as json_file:
+            with open(self.file_path, 'w') as json_file:
                 json.dump(data, json_file,indent=2)
             return signed_statement
         except FileNotFoundError:
             my_statements = []
             my_statements.append(json.loads(signed_statement)) #here
-            f1 = os.open (home_directory+"/.hydra_statements", os.O_CREAT, 0o700)
+            f1 = os.open (self.file_path, os.O_CREAT, 0o700)
             os.close (f1)
-            with open(home_directory+'/.hydra_statements', 'a') as json_file:                
+            with open(self.file_path, 'a') as json_file:                
                 json.dump(my_statements, json_file, indent=2)
             return signed_statement
             
