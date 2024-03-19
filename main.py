@@ -6,10 +6,17 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from api.hydra import HydraWallet
 import json
+from kivy import platform
 
 
 class BlockchainApp(App):
-
+    def on_start(self):
+        if platform == "android":
+            from android.permissions import request_permissions, Permission
+            # Request storage permission
+            request_permissions(
+                [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
+            
     def build(self):
         self.blockchain = HydraWallet()
         self.wallets = self.get_vaults()
