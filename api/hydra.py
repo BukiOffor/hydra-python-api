@@ -138,7 +138,8 @@ class HydraWallet:
             _params = vault['plugins'][0]['parameters']
             data = json.dumps(vault)
             params = json.dumps(_params)
-            addr = requests.post(api+"/api/get_wallet", json={"vault":data,"account":key}).json()
+            print(data)
+            addr = requests.post(api+"/api/get_wallet", json={"data":data,"account":str(key)}).json()
             return addr
     
 
@@ -149,7 +150,7 @@ class HydraWallet:
             vault = file_content[account][1]
             vault = json.dumps(vault)
             #did = iop.generate_did_by_morpheus(vault, password)
-            did = requests.post(api+"/api/generate_did_by_morpeus", json={"vault": vault, "password": password}).json()
+            did = requests.post(api+"/api/generate_did_by_morpheus", json={"vault": vault, "password": password}).json()
             return(did)
 
 
