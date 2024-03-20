@@ -105,8 +105,8 @@ class HydraWallet:
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
-            f1 = os.open (self.file_path, os.O_CREAT, 0o700)
-            os.close (f1)
+            #f1 = os.open (self.file_path, os.O_CREAT, 0o700)
+            #os.close (f1)
             with open(self.file_path, 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
             return phrase
