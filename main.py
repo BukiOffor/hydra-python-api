@@ -5,17 +5,27 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from api.hydra import HydraWallet
+from kivy.logger import Logger
 import json
 from kivy import platform
 import os
+from android.permissions import Permission, request_permissions, check_permission
+
+def check_permissions(perms):
+    for perm in perms:
+        if check_permission(perm) != True:
+            return False
+    return True
 
 class BlockchainApp(App):
     def on_start(self):
         if platform == "android":
-            from android.permissions import request_permissions, Permission
-            # Request storage permission
-            request_permissions(
-                [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
+            Logger.info("App Started")
+            perms = [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE] 
+            if  check_permissions(perms )!= True:
+                Logger.info("Requesting permission to write to disk")
+                request_permissions(perms)    # get android permissions     
+                exit()  
             
     def build(self):
         file_path = ""
