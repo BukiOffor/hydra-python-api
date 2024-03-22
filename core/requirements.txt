@@ -1,3 +1,3 @@
 flask
-iop-python
+iop-python==0.1.0
 rsa==4.9

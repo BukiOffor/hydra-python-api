@@ -9,19 +9,24 @@ from kivy.logger import Logger
 import json
 from kivy import platform
 import os
-from android.permissions import Permission, request_permissions, check_permission
 
 def check_permissions(perms):
-    Logger.info("Checking permission to write to disk")
-    for perm in perms:
-        if check_permission(perm) != True:
-            Logger.error("Does not have permission to write to disk")
-            return False
+    if platform == "android":
+        from android.permissions import Permission, request_permissions, check_permission
+
+        Logger.info("Checking permission to write to disk")
+        for perm in perms:
+            if check_permission(perm) != True:
+                Logger.error("Does not have permission to write to disk")
+                return False
+        return True
+    # if platform is not android automatically
     return True
 
 class BlockchainApp(App):
     def on_start(self):
         if platform == "android":
+            from android.permissions import Permission, request_permissions, check_permission
             Logger.info("App Started")
             perms = [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE] 
             if  check_permissions(perms )!= True:
@@ -108,8 +113,8 @@ class BlockchainApp(App):
         # Generate a persona DID
         input_label = Label(text="Enter Password to Generate DID: ")
         layout.add_widget(input_label)        
-        self.did_password = TextInput(multiline=False,width=200)
-        layout.add_widget(self.did_password)
+        self.did_password_generated = TextInput(multiline=False,width=200)
+        layout.add_widget(self.did_password_generated)
         self.button_generate_persona_did = Button(text="Generate Persona DID ", on_press=self.generate_persona_did)
         layout.add_widget(self.button_generate_persona_did)
         self.entry_persona_did = TextInput(multiline=False, width=300)
@@ -282,16 +287,18 @@ class BlockchainApp(App):
                           size_hint=(None, None), size=(400, 200))
             popup.open()
             return
-        perms = [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE] 
-        if  check_permissions(perms)!= True:
-            request_permissions(perms) 
+        # if platform == "android":
+        #     from android.permissions import Permission, request_permissions, check_permission
+        #     perms = [Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE] 
+        #     if  check_permissions(perms)!= True:
+        #         request_permissions(perms) 
         phrase = self.blockchain.generate_phrase()
         resp = self.blockchain.generate_wallet(unlock_password,phrase)
         self.entry_new_address.text = resp
 
 
     def generate_persona_did(self,instance):
-        password = self.did_password.text
+        password = self.did_password_generated.text
         if len(self.wallets) > 0 and password != "":
             resp = self.blockchain.generate_did(password)
             self.entry_persona_did.text = resp

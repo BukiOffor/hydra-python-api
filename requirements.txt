@@ -1,17 +1,21 @@
 altgraph==0.17.4
 appdirs==1.4.4
 asyncio==3.4.3
+blinker==1.7.0
 build==1.0.3
 buildozer==1.5.0
 certifi==2023.11.17
 charset-normalizer==3.3.2
+click==8.1.7
 colorama==0.4.6
 Cython==0.29.33
 distlib==0.3.7
 docutils==0.20.1
 filelock==3.13.1
+Flask==3.0.2
 idna==3.6
--e git+https://github.com/BukiOffor/hydra-python-api.git@9d814dda43936252ed037e4bcdd7dca2f624759b#egg=iop_python
+-e git+https://github.com/BukiOffor/hydra-python-api.git@3c2a0d61e51a8c57e0f36b2d060e2c3ae4ed5896#egg=iop_python
+itsdangerous==2.1.2
 Jinja2==3.1.2
 Kivy==2.2.1
 Kivy-Garden==0.1.5
@@ -26,9 +30,11 @@ Pygments==2.17.2
 pyinstaller==6.2.0
 pyinstaller-hooks-contrib==2023.10
 pyproject_hooks==1.0.0
+python-for-android==2024.1.21
 requests==2.31.0
 sh==1.14.3
 toml==0.10.2
 tomli==2.0.1
 urllib3==2.1.0
 virtualenv==20.25.1
+Werkzeug==3.0.1
