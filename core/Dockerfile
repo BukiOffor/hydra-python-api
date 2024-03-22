@@ -1,16 +1,17 @@
 FROM nikolaik/python-nodejs
+USER pn
+WORKDIR /home/pn/app
 
-
-WORKDIR /app
-
+COPY . /home/pn/app/
+RUN ls -la /home/pn/app/*
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-RUN . "$HOME/.cargo/env" 
-ENV PATH ~/.cargo/bin:$PATH
+ENV PATH /home/pn/.cargo/bin:$PATH
 
-
-COPY ./requirements.txt /app
+# Install Python dependencies.
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-COPY . .
+
+
 EXPOSE 5000
 ENV FLASK_APP=app.py
 CMD ["flask", "run", "--host", "0.0.0.0"]
