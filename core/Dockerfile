@@ -4,7 +4,8 @@ FROM nikolaik/python-nodejs
 WORKDIR /app
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-ENV PATH /app/.cargo/bin:$PATH
+RUN source $HOME/.cargo
+ENV PATH ~/.cargo/bin:$PATH
 
 
 COPY ./requirements.txt /app
