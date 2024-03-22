@@ -37,7 +37,7 @@ class HydraChain:
         
     def verify_statement_with_did(self, signed_statement):
         did = json.loads(signed_statement)['content']['claim']['subject']
-        url = f"https://test.explorer.hydraledger.tech:4705/morpheus/v1/did/{did}/document"
+        url = f"https://dev.explorer.hydraledger.tech:4705/morpheus/v1/did/{did}/document"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
@@ -51,7 +51,7 @@ class HydraChain:
         return nonce
     
     def get_account_transactions(self,address):
-        url = f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{address}/transactions"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{address}/transactions"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
@@ -177,7 +177,7 @@ class HydraWallet:
 
     def get_nonce(self,key=0):
         addr = self.get_wallet_address(key=key)
-        url = f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
@@ -204,7 +204,7 @@ class HydraWallet:
     def send_transaction(self,receiver,amount,password,account=0,key=0):
         # Send a GET request to the URL
         signed_txs = self.sign_transaction(receiver,amount,password,account,key)
-        url = "https://test.explorer.hydraledger.tech:4705/api/v2/transactions"
+        url = "https://dev.explorer.hydraledger.tech:4705/api/v2/transactions"
         res = requests.post(url, json=signed_txs)
         response = res.json()
         #print(response)
@@ -212,7 +212,7 @@ class HydraWallet:
 
 
     def check_transaction(self,txhash):
-        url = f"https://test.explorer.hydraledger.tech:4705/api/v2/transactions/{txhash}"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/transactions/{txhash}"
         res = requests.get(url)
         response = res.json()
         txid = response['data']['id']
@@ -226,7 +226,7 @@ class HydraWallet:
         addr = self.get_wallet_address()
         if addr == None:
             return None
-        response = requests.get(f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}")
+        response = requests.get(f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}")
         if response.status_code == 200:
             data = response.json()
             balance = data['data']['balance']
@@ -239,7 +239,7 @@ class HydraWallet:
         addr = self.get_wallet_address()
         if addr == None:
             return None
-        url = f"https://test.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}/transactions"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}/transactions"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
