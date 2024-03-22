@@ -13,5 +13,5 @@ RUN pip install -r requirements.txt
 
 
 EXPOSE 5000
-ENV FLASK_APP=app.py
+ENV FLASK_APP=/home/pn/app/app.py
 CMD ["flask", "run", "--host", "0.0.0.0"]
