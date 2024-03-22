@@ -1,4 +1,4 @@
-FROM rust:slim-buster
+FROM rust:1.67 as builder
 
 FROM python:3.8-slim
 
