@@ -4,7 +4,7 @@ FROM nikolaik/python-nodejs
 WORKDIR /app
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-RUN source $HOME/.cargo
+RUN . "$HOME/.cargo/env" 
 ENV PATH ~/.cargo/bin:$PATH
 
 
