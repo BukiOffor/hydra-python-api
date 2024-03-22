@@ -3,7 +3,7 @@ FROM nikolaik/python-nodejs
 
 WORKDIR /app
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -- -y
 ENV PATH /app/.cargo/bin:$PATH
 
 
