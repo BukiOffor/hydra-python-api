@@ -11,6 +11,8 @@ ENV PATH /home/pn/.cargo/bin:$PATH
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+ENV PYTHONPATH "${PYTHONPATH}:/home/pn/app/"
+
 
 EXPOSE 5000
 ENV FLASK_APP=/home/pn/app/app.py
