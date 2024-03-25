@@ -13,7 +13,7 @@ RUN pip install -r requirements.txt
 
 ENV PYTHONPATH "${PYTHONPATH}:/home/pn/app/"
 
-
+RUN python3 /home/pn/app/keys/key.py
 EXPOSE 5000
 ENV FLASK_APP=/home/pn/app/app.py
 # Specify the command to run on container start

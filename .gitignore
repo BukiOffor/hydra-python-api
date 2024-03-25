@@ -71,4 +71,5 @@ docs/_build/
 # Pyenv
 .python-version
 
-core/keys
+core/keys/private.pem
+core/keys/public.pem
