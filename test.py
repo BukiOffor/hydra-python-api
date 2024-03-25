@@ -1,6 +1,11 @@
 import iop_python as iop
+from api import hydra
+
+wallet = hydra.HydraWallet()
 
 
+c = wallet.get_new_acc_on_vault('password')
+print(c)
 
 
 phrase = "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather sca"
