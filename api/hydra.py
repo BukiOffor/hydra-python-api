@@ -2,6 +2,7 @@
 import requests
 import json
 import os
+import rsa
 
 #https://test.explorer.hydraledger.tech/wallets/tdXxhgZV8aAGLL9CCJ4ry9AzTQZzRKqJ97
 
@@ -20,9 +21,9 @@ import os
 # |                                                                                                     |
 # |                                                                                                     |
 # -------------------------------------------------------------------------------------------------------
-api = "https://iop-server.onrender.com"
-
-
+#api = "https://iop-server.onrender.com"
+api = 'http://127.0.0.1:8088'
+host = "http://127.0.0.1:8088"
 class HydraChain:
 
     home_directory = os.path.expanduser("~")
@@ -74,42 +75,97 @@ class HydraWallet:
         nonce = requests.get(api+"/api/generate_nonce").json()
         return nonce
 
+    def get_server_pkey(self):
+        pem_key = requests.get(f"{api}/key").content
+        pubkey = rsa.PublicKey.load_pkcs1(pem_key)
+        return pubkey
+
     def generate_phrase(self):
-       phrase = requests.get(api+"/api/generate_phrase").json()
-       return phrase
+       self.generate_key()
+       pubkey = self.load_pub_key()
+       data = {"key": pubkey.save_pkcs1().hex()}
+       response = requests.post(api+"/phrase", json=data).json()
+       cipher = response['cipher']
+       phrase =  rsa.decrypt(bytes.fromhex(cipher), self.load_priv_key())
+       return (phrase.decode("utf8"))
+
     
     def load_wallets(self):
         try:
-            with open(self.file_path, 'r') as json_file:
+            with open(f"{self.file_path}/.hydra_wallet", 'r') as json_file:
                 wallets = json.load(json_file)
                 return wallets
         except FileNotFoundError:
             print("user does not own any wallets")
             return []
-        
+
+
+    def generate_key(self):
+        if not os.path.exists(f"{self.file_path}/private.pem" and f"{self.file_path}/public.pem"):
+            (pubkey, privkey) = rsa.newkeys(2048)
+            # Write public key to file
+            pub = pubkey.save_pkcs1()
+            pubfile = open(f'{self.file_path}/public.pem', 'wb')
+            pubfile.write(pub)
+            pubfile.close()
+
+            # Write private Key to file
+            pri = privkey.save_pkcs1()
+            prifile = open(f'{self.file_path}/private.pem', 'wb')
+            prifile.write(pri)
+            prifile.close()  
+
+    def load_priv_key(self):
+        """Load the private key."""
+        with open(f'{self.file_path}/private.pem', mode='rb') as privatefile:
+            keydata = privatefile.read()
+            privkey = rsa.PrivateKey.load_pkcs1(keydata)
+            return privkey
+    
+    def load_pub_key(self):
+        """Load the public key."""
+        with open(f'{self.file_path}/public.pem', mode='rb') as privatefile:
+            keydata = privatefile.read()
+            pubkey = rsa.PublicKey.load_pkcs1(keydata)
+            return pubkey
+
+
     def generate_wallet(self, password,phrase):
-        hyd_vault = requests.post(api+"/api/get_hyd_vault", json={"password":password,"phrase":phrase}).json()
-        morpheus_vault = requests.post(api+"/api/get_morpheus_vault", json={"password":password,"phrase":phrase}).json()
-        h_vault = json.loads(hyd_vault)
-        m_vault = json.loads(morpheus_vault)
+        self.generate_key()
+        phrase_copy = phrase
+        pubkey = self.get_server_pkey()
+        password = rsa.encrypt(password.encode("utf8"), pubkey)
+        phrase = rsa.encrypt(phrase.encode("utf8"), pubkey)
+        response = requests.post(api+"/get_hyd_vault", json={"password":password.hex(),"phrase":phrase.hex()})
+        result = requests.post(api+"/get_morpheus_vault", json={"password":password.hex(),"phrase":phrase.hex()})
+        if result.status_code != 200 and response.status_code != 200:
+            print("Error:", result.text)
+            print("Error:", response.text)
+            return None            
+        response = response.json()
+        result = result.json()
+        h_vault = json.loads(response['hyd_vault'])
+        m_vault = json.loads(result['morpheus_vault'])
         vaults = []
         vaults.append(h_vault) 
         vaults.append(m_vault)
+        # Check if the file does not exist
+
         try:
-            with open(self.file_path, 'r') as file:
+            with open(f"{self.file_path}/.hydra_wallet", 'r') as file:
                 data = json.load(file)
                 data.append(vaults)
-            with open(self.file_path, 'w') as json_file:
+            with open(f"{self.file_path}/.hydra_wallet", 'w') as json_file:
                 json.dump(data, json_file,indent=2)
-            return phrase
+            return phrase_copy
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
-            #f1 = os.open (self.file_path, os.O_CREAT, 0o700)
-            #os.close (f1)
-            with open(self.file_path, 'a') as json_file:                
+            # f1 = os.open (f"{self.file_path}/.hydra_wallet", os.O_CREAT, 0o700)
+            # os.close (f1)
+            with open(f"{self.file_path}/.hydra_wallet", 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
-            return phrase
+            return phrase_copy
     
     def get_new_acc_on_vault(self,password, account=0):
         data = self.load_wallets()
@@ -117,12 +173,18 @@ class HydraWallet:
             vault = data[account][0]
             new_account = vault['plugins'][-1]['parameters']['account']
             vault_data = json.dumps(vault)
-            new_wallet = requests.post(api+"/api/get_new_acc_on_vault", json={"vault":vault_data,"password":password,"account": new_account+1}).json()
+            pubkey = self.get_server_pkey()
+            password = rsa.encrypt(password.encode("utf8"), pubkey)
+            response = requests.post(api+"/get_new_acc_on_vault", json={"vault":vault_data,"password":password.hex(),"account": new_account+1})
+            if response.status_code != 200:
+                print("Error:", response.text)
+                return None 
+            new_wallet = response.json()
+            print(new_wallet)
             data[account][0] = json.loads(new_wallet)
-            with open(self.file_path, 'w') as json_file:                
+            with open(f"{self.file_path}/.hydra_wallet", 'w') as json_file:                
                 json.dump(data, json_file, indent=2)
             return new_wallet
-
 
 
     def get_wallet_address(self,account=0,key=0):
@@ -252,7 +314,7 @@ class HydraWallet:
     def delete_account(self,index):
         wallets = self.load_wallets()
         wallets.pop(int(index))
-        with open(self.file_path, 'w') as json_file:
+        with open(f"{self.file_path}/.hydra_wallet", 'w') as json_file:
             json.dump(wallets, json_file, indent=2)
 
     
@@ -310,18 +372,18 @@ class HydraWallet:
         data = self.generate_statement(statement,password)
         signed_statement = self.sign_witness_statement(password,json.dumps(data))
         try:
-            with open(self.file_path, 'r') as file:
+            with open(f"{self.file_path}/.statements", 'r') as file:
                 data = json.load(file)
                 data.append(json.loads(signed_statement)) #here
-            with open(self.file_path, 'w') as json_file:
+            with open(f"{self.file_path}/.statements", 'w') as json_file:
                 json.dump(data, json_file,indent=2)
             return signed_statement
         except FileNotFoundError:
             my_statements = []
             my_statements.append(json.loads(signed_statement)) #here
-            f1 = os.open (self.file_path, os.O_CREAT, 0o700)
+            f1 = os.open (f"{self.file_path}/.statements", os.O_CREAT, 0o700)
             os.close (f1)
-            with open(self.file_path, 'a') as json_file:                
+            with open(f"{self.file_path}/.statements", 'a') as json_file:                
                 json.dump(my_statements, json_file, indent=2)
             return signed_statement
             

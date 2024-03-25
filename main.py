@@ -38,10 +38,12 @@ class BlockchainApp(App):
         file_path = ""
         if platform == "android":
              from android.storage import app_storage_path, primary_external_storage_path, secondary_external_storage_path
-             file_path = os.path.join( primary_external_storage_path(),'.hydra_wallet')
+             os.makedirs(str(primary_external_storage_path()) + ".hydra", exist_ok=True)
+             file_path = os.path.join( primary_external_storage_path(),'.hydra')
         else:
             home_directory = os.path.expanduser("~")
-            file_path = home_directory+"/.hydra_wallet"
+            os.makedirs(os.path.join(home_directory,".hydra"), exist_ok=True)
+            file_path = home_directory+"/.hydra"
         print(file_path)
         self.blockchain = HydraWallet(file_path)
         self.wallets = self.get_vaults()

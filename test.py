@@ -4,8 +4,9 @@ import json
 
 #implement your logic here
 chain =  HydraChain()
-wallet = HydraWallet()
+wallet = HydraWallet("/Users/mac/.hydra")
 
 
-nonce = chain.generate_nonce()
-print(nonce)
+phrase = wallet.generate_phrase()
+seed = wallet.get_new_acc_on_vault("password") 
+print(seed)

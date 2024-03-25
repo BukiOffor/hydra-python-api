@@ -32,7 +32,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_new_acc_on_vault)
             .service(validate_statement_with_did)        
         })
-        .bind("0.0.0.0:8088")?
+        .bind("127.0.0.1:8088")?
         .run()
         .await
 }
