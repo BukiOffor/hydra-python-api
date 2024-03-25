@@ -9,4 +9,5 @@ wallet = HydraWallet("/Users/mac/.hydra")
 
 phrase = wallet.generate_phrase()
 seed = wallet.get_new_acc_on_vault("password") 
-print(seed)
+statement = wallet.sign_did_statement("statement", "password")
+print(statement)

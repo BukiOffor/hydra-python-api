@@ -4,7 +4,7 @@ import json
 
 #implement your logic here
 chain =  HydraChain()
-wallet = HydraWallet()
+wallet = HydraWallet("/Users/mac/.hydra")
 
 
 # sign a witness statement with your did key
@@ -21,8 +21,8 @@ signed_witness_statement = wallet.generate_and_sign_statement(statement,"passwor
 print(json.loads(signed_witness_statement))
 
 # Verify Signed Statement
-result = chain.verify_signed_statement(signed_witness_statement, False)
-print("The signed statement returned: ",result) #should always return true
+# result = chain.verify_signed_statement(signed_witness_statement, False)
+# print("The signed statement returned: ",result) #should always return true
 
 
 #sign a did statement with your did key

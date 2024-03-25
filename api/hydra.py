@@ -48,7 +48,7 @@ class HydraChain:
         
 
     def generate_nonce(self):
-        nonce = requests.get(api+"/api/generate_nonce").json()
+        nonce = requests.get(api+"/nonce").json()
         return nonce
     
     def get_account_transactions(self,address):
@@ -72,7 +72,7 @@ class HydraWallet:
         self.file_path = path
 
     def generate_nonce(self):
-        nonce = requests.get(api+"/api/generate_nonce").json()
+        nonce = requests.get(api+"/nonce").text
         return nonce
 
     def get_server_pkey(self):
@@ -179,12 +179,11 @@ class HydraWallet:
             if response.status_code != 200:
                 print("Error:", response.text)
                 return None 
-            new_wallet = response.json()
-            print(new_wallet)
-            data[account][0] = json.loads(new_wallet)
+            wallet = response.json()
+            data[account][0] = json.loads(wallet["vault"])
             with open(f"{self.file_path}/.hydra_wallet", 'w') as json_file:                
                 json.dump(data, json_file, indent=2)
-            return new_wallet
+            return wallet["vault"]
 
 
     def get_wallet_address(self,account=0,key=0):
@@ -194,8 +193,11 @@ class HydraWallet:
             _params = vault['plugins'][0]['parameters']
             data = json.dumps(vault)
             params = json.dumps(_params)
-            #print(data)
-            addr = requests.post(api+"/api/get_wallet", json={"data":data,"account":str(key)}).json()
+            response = requests.post(api+"/get_wallet", json={"vault":data,"account":str(key)})
+            if response.status_code != 200:
+                print("Error:", response.text)
+                return None 
+            addr = response.text
             return addr
     
 
@@ -204,9 +206,15 @@ class HydraWallet:
         if len(file_content) > 0:
             vault = file_content[account][1]
             vault = json.dumps(vault)
+            pubkey = self.get_server_pkey()
+            password = rsa.encrypt(password.encode("utf8"), pubkey)
             #did = iop.generate_did_by_morpheus(vault, password)
-            did = requests.post(api+"/api/generate_did_by_morpheus", json={"vault": vault, "password": password}).json()
-            return(did)
+            response = requests.post(api+"/generate_did_by_morpheus", json={"vault": vault, "password": password.hex()})
+            if response.status_code != 200:
+                print("Error:", response.text)
+                return None 
+            did = response.text
+            return did
 
 
     def recover_wallet(self,password,phrase):
@@ -219,16 +227,28 @@ class HydraWallet:
             vault = file_content[account][1]
             vault = json.dumps(vault)
             #signed_statement = iop.sign_witness_statement(vault,password,data)
-            signed_statement = requests.post(api+"/api/sign_witness_statement", json={"vault":vault, "password":password, "data":data}).json()
-            return signed_statement      
+            pubkey = self.get_server_pkey()
+            password = rsa.encrypt(password.encode("utf8"), pubkey)
+            response = requests.post(api+"/sign_witness_statement", json={"vault":vault, "password":password.hex(), "data":data})
+            if response.status_code != 200:
+                print("Error:", response.text)
+                return None 
+            signed_statement = response.json() 
+            return signed_statement["signed"]      
     
     def sign_did_statement(self,statement,password,account=0):
         wallet = self.load_wallets()
         vault = wallet[account][1]
         vault = json.dumps(vault)
         data = bytes(statement, "utf-8")
+        pubkey = self.get_server_pkey()
+        password = rsa.encrypt(password.encode("utf8"), pubkey)
         #signed_statement = iop.sign_did_statement(vault,password,data)
-        signed_statement = requests.post(api+"/api/sign_did_statement", json={"vault":vault,"password":password,"data":data}).json()
+        response = requests.post(api+"/sign_did_statement", json={"vault":vault,"password":password.hex(),"data":data.hex()})
+        if response.status_code != 200:
+                print("Error:", response.text)
+                return None 
+        signed_statement = response.json() 
         details = {
             "content": statement,
             "publicKey": signed_statement["public_key"],
@@ -258,7 +278,7 @@ class HydraWallet:
         params = json.dumps(_params)
         #response = iop.generate_transaction(data,receiver,amount,nonce,password,key)
         tx = {"data":data,"receiver":receiver,"amount":amount,"nonce":nonce, "password":password, "account":key}
-        response = requests.post(api+"/api/generate_transcation", json=tx)
+        response = requests.post(api+"/sign_transcation", json=tx)
         signed_txs = json.loads(response)
         return signed_txs    
 
@@ -318,7 +338,6 @@ class HydraWallet:
             json.dump(wallets, json_file, indent=2)
 
     
-    @classmethod
     def generate_statement(self,statement,password):
         data = {
                 "claim": {
@@ -367,7 +386,6 @@ class HydraWallet:
                 }
         return data
             
-    @classmethod
     def generate_and_sign_statement(self,statement,password):
         data = self.generate_statement(statement,password)
         signed_statement = self.sign_witness_statement(password,json.dumps(data))
