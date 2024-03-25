@@ -276,10 +276,23 @@ class HydraWallet:
         _params = vault['plugins'][0]['parameters']
         data = json.dumps(vault)
         params = json.dumps(_params)
+        salt = self.generate_nonce()
+        message = receiver+amount+nonce+key+salt+password
+        hash = rsa.compute_hash(message, 'SHA-1')
         #response = iop.generate_transaction(data,receiver,amount,nonce,password,key)
-        tx = {"data":data,"receiver":receiver,"amount":amount,"nonce":nonce, "password":password, "account":key}
-        response = requests.post(api+"/sign_transcation", json=tx)
-        signed_txs = json.loads(response)
+        pubkey = self.get_server_pkey()
+        password = rsa.encrypt(password.encode("utf8"), pubkey)
+        tx = { 
+              "data":data,"receiver":receiver,"amount":amount,
+              "nonce":nonce, "password":password.hex(), 
+              "account":key, "salt":salt, "hash": hash.hex()
+            }
+        response = requests.post(api+"/sign_transaction", json=tx)
+        if response.status_code != 200:
+            return None
+
+        signed_txs = response.json()
+        #signed_txs = json.loads(response)
         return signed_txs    
 
     #this function assumes that the wallet has made a transaction before
