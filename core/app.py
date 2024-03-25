@@ -213,10 +213,21 @@ def sign_transaction():
         payload = request.get_json()
         password_cipher = payload['password']
         vault = payload['vault']
-        # decrypt password and phrase
+        salt = payload['salt']
+        receiver = payload['receiver']
+        amount = payload['amount']
+        nonce = payload['nonce']
+        hash = payload['hash']
+        account = payload['account']
+        # decrypt password 
         password = decrypt_file(bytes.fromhex(password_cipher))
-        did = iop.generate_did_by_morpheus(vault,password.decode("utf8"))
-        return did
+        # reconstruct and compute hash
+        message = receiver+amount+nonce+account+salt+password
+        computed_hash = rsa.compute_hash(message, 'SHA-1')
+        if computed_hash != hash:
+            return None
+        signed_transaction = iop.generate_transaction(vault,receiver,amount,nonce,password.decode("utf8"),account)
+        return signed_transaction
 
 
 
