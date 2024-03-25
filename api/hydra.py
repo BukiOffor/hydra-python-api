@@ -21,9 +21,9 @@ import rsa
 # |                                                                                                     |
 # |                                                                                                     |
 # -------------------------------------------------------------------------------------------------------
-#api = "https://iop-server.onrender.com"
-api = 'http://127.0.0.1:8088'
-host = "http://127.0.0.1:8088"
+api = "https://iop-server.onrender.com"
+#api = 'http://127.0.0.1:8088'
+#host = "http://127.0.0.1:8088"
 class HydraChain:
 
     home_directory = os.path.expanduser("~")
