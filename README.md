@@ -10,26 +10,22 @@ Building a python Api for hydra-ledger blockchain using Maturin and Rust wasm
 ### Prerequisite
 
 * Rust
-* Maturin
+* virtualenv (optional)
+
 
 Enter the base directory of the project and activate the virtual environment with the following command and install the required python packages.
 
 ```bash
 source env/bin/activate
-pip install -r requirements.txt
-```
-
-To compile the code, you can run the following command. This command builds a python wheel for the rust code.
-```bash
-maturin develop
+pip install iop-python
 ```
 
 ## Usage
 
-`hydra.py` contains a module that interacts with the hydra testnet. To use the module, you can import the `HydraWallet` class from hydra.py.
+`iop-python` contains a module that interacts with the hydraledger blockchain. The module contains methods that can be used to interact with the chain, once instanciated with a seed phrase.
 
 ```python
-from hydra import HydraWallet
+import iop-python as iop
 ```
 
 The `HydraWallet` contains methods that can be used to interacts with the chain, once instanciated with a seed phrase.

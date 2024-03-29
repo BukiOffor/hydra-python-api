@@ -1,6 +1,6 @@
 [package]
 name = "iop-python"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,6 +9,9 @@ name = "iop_python"
 crate-type = ["cdylib"]
 
 [dependencies]
+#[target.'cfg(target_os = "android")']
+#rustflags = ["-C", "link-arg=-s"]
+
 pyo3 = { version = "0.20", features = ["extension-module"] }
 iop-sdk = "0.0.16"
 reqwest = { version = "0.11.22", features = ["json"] }
@@ -16,4 +19,5 @@ pyo3-asyncio = { version = "0.20", features = ["attributes", "async-std-runtime"
 async-std = {version = "1.9", features = ["attributes", "tokio1"]}
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = "1.0.108"
+json-digest = "0.0.16"
 #pyo3-async = "0.3.1"
