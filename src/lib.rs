@@ -1,9 +1,10 @@
+use iop_sdk::ciphersuite::secp256k1::Secp256k1;
 use iop_sdk::hydra::txtype::{
     hyd_core::Transaction, Aip29Transaction, CommonTransactionFields, OptionalTransactionFields,
 };
 use iop_sdk::vault::hydra::HydraSigner;
 use iop_sdk::{
-    ciphersuite::secp256k1::{hyd, SecpKeyId, SecpPrivateKey, SecpPublicKey},
+    ciphersuite::secp256k1::{hyd,SecpKeyId, SecpPrivateKey, SecpPublicKey},
     vault::{hydra, morpheus, Bip39, Vault},
 };
 use iop_sdk::{
@@ -16,18 +17,23 @@ use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt::Display};
 
+
 //use pyo3::exceptions;
 use pyo3::panic::PanicException;
 //use iop_sdk::multicipher::MKeyId;
-//use iop_sdk::vault::{PrivateKey,Network,};
+//use iop_sdk::vault::{PrivateKey,Network as HydNetwork};
+use iop_sdk::vault::Network as HydNetwork;
 use iop_sdk::morpheus::crypto::{sign::PrivateKeySigner, Signed};
 use iop_sdk::morpheus::data::{Did, WitnessStatement};
 use iop_sdk::multicipher::MPublicKey;
 use iop_sdk::vault::morpheus::Private;
+use std::str::FromStr;
+use iop_sdk::ciphersuite::secp256k1::hyd::{Testnet,Mainnet};
 
 #[derive(Debug)]
 pub enum Err {
-    CouldNotSendTrsansaction,
+    CouldNotSendTransaction,
+    CouldNotMatchNetwork
 }
 
 
@@ -64,12 +70,33 @@ struct SendTxnsReq<'a> {
     transactions: Vec<&'a TransactionData>,
 }
 
+
+pub struct Network {
+    network: Box< dyn HydNetwork<Suite=Secp256k1>>
+}
+
+impl FromStr for Network {
+    type Err = Err;  
+    fn from_str(s:&str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str()
+         {
+            "testnet" => Ok(Self{network: Box::new(Testnet)}),
+            "mainnet" =>  Ok(Self{network: Box::new(Mainnet)}),
+            "devnet" =>  Ok(Self{network: Box::new(hyd::Devnet)}),
+            _ => Err(Err::CouldNotMatchNetwork),
+        }
+    }
+}
+
+
+
 #[pyfunction]
 #[allow(unused_variables)]
-pub fn get_hyd_vault(phrase: String, password: String) -> PyResult<String> {
+pub fn get_hyd_vault(phrase: String, password: String, network: String) -> PyResult<String> {
     let mut vault =
         Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
-    let params = hydra::Parameters::new(&hyd::Testnet, 0);
+    let network = network.parse::<Network>().unwrap().network;
+    let params = hydra::Parameters::new(&*network, 0);
     hydra::Plugin::init(&mut vault, &password, &params).expect("plugin could not be initialised");
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be initialized");
     let admin = serde_json::to_string_pretty(&vault).unwrap();
@@ -102,22 +129,26 @@ pub fn get_new_acc_on_vault(
     data: String,
     unlock_password: String,
     account: i32,
+    network: String
 ) -> PyResult<String> {
     let mut vault: Vault = serde_json::from_str(&data).unwrap();
-    let params = hydra::Parameters::new(&hyd::Testnet, account);
+    let network = Network::from_str(&network).unwrap().network;
+    let params = hydra::Parameters::new(&*network, account);
     Plugin::create(&mut vault, unlock_password, &params).expect("vault could not be created");
     let admin = serde_json::to_string_pretty(&vault).unwrap();
     Ok(admin)
 }
 
 #[allow(unused)]
-fn deserialize_hydra(
+fn deserialize_hydra<'a>(
     data: String,
     unlock_password: String,
     account: i32,
+    network: &'a str
 ) -> Result<(SecpPrivateKey, SecpPublicKey, SecpKeyId), ()> {
     let vault: Vault = serde_json::from_str(&data).unwrap();
-    let params = hydra::Parameters::new(&hyd::Testnet, account);
+    let network = Network::from_str(network).unwrap().network;
+    let params = hydra::Parameters::new(&*network, account);
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be gotten");
     let wallet_private = wallet
         .private(&unlock_password)
@@ -223,10 +254,12 @@ pub fn generate_transaction<'a>(
     nonce: u64,
     password: String,
     account: i32,
+    network: &'a str
 ) -> PyResult<String> {
     let mut transactions = Vec::new();
-    let signer = deserialize_hydra(data, password, account).unwrap();
-    let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &hyd::Testnet).unwrap();
+    let signer = deserialize_hydra(data, password, account,network).unwrap();
+    let network = network.parse::<Network>().unwrap().network;
+    let recipient_id = SecpKeyId::from_p2pkh_addr(receiver.as_str(), &*network).unwrap();
     let nonce = nonce + 1;
     let optional = OptionalTransactionFields {
         amount,
@@ -234,7 +267,7 @@ pub fn generate_transaction<'a>(
         vendor_field: None,
     };
     let common_fields = CommonTransactionFields {
-        network: &hyd::Testnet,
+        network: &*network,
         sender_public_key: signer.1,
         nonce,
         optional,
@@ -249,9 +282,10 @@ pub fn generate_transaction<'a>(
 
 #[pyfunction]
 #[allow(unused_variables)]
-pub fn get_wallet(data: String, account: i32) -> PyResult<String> {
+pub fn get_wallet<'a>(data: String, account: i32, network: &'a str) -> PyResult<String> {
     let vault: Vault = serde_json::from_str(&data).unwrap();
-    let params = hydra::Parameters::new(&hyd::Testnet, account);
+    let network = network.parse::<Network>().unwrap().network;
+    let params = hydra::Parameters::new(&*network, account);
     let wallet = hydra::Plugin::get(&vault, &params).expect("wallet could not be gotten");
     let wallet_address = wallet.public().unwrap().key_mut(0).unwrap().to_p2pkh_addr();
     Ok(wallet_address)
