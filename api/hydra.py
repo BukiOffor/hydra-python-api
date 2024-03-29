@@ -3,7 +3,7 @@ import requests
 import json
 import os
 
-#https://test.explorer.hydraledger.io/wallets/tdXxhgZV8aAGLL9CCJ4ry9AzTQZzRKqJ97
+#https://dev.explorer.hydraledger.tech/wallets/tdXxhgZV8aAGLL9CCJ4ry9AzTQZzRKqJ97
 
 # ---------------------------------------MileStone 2-----------------------------------------------------
 # |                                                                                                     |
@@ -36,7 +36,7 @@ class HydraChain:
         
     def verify_statement_with_did(self, signed_statement):
         did = json.loads(signed_statement)['content']['claim']['subject']
-        url = f"https://test.explorer.hydraledger.io:4705/morpheus/v1/did/{did}/document"
+        url = f"https://dev.explorer.hydraledger.tech:4705/morpheus/v1/did/{did}/document"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
@@ -50,7 +50,7 @@ class HydraChain:
         return nonce
     
     def get_account_transactions(self,address):
-        url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{address}/transactions"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{address}/transactions"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
@@ -84,8 +84,8 @@ class HydraWallet:
             return []
         
     @classmethod
-    def generate_wallet(cls, password,phrase):
-        hyd_vault = iop.get_hyd_vault(phrase, password)
+    def generate_wallet(cls, password,phrase,network="devnet"):
+        hyd_vault = iop.get_hyd_vault(phrase, password,network)
         morpheus_vault = iop.get_morpheus_vault(phrase, password)
         h_vault = json.loads(hyd_vault)
         m_vault = json.loads(morpheus_vault)
@@ -110,13 +110,13 @@ class HydraWallet:
             return phrase
     
     @classmethod
-    def get_new_acc_on_vault(cls,password, account=0):
+    def get_new_acc_on_vault(cls,password, account=0, network="devnet"):
         data = cls.load_wallets()
         if len(data) > 0:
             vault = data[account][0]
             new_account = vault['plugins'][-1]['parameters']['account']
             vault_data = json.dumps(vault)
-            new_wallet = iop.get_new_acc_on_vault(vault_data,password,new_account+1)
+            new_wallet = iop.get_new_acc_on_vault(vault_data,password,new_account+1,network)
             data[account][0] = json.loads(new_wallet)
             with open(cls.file_path, 'w') as json_file:                
                 json.dump(data, json_file, indent=2)
@@ -125,14 +125,14 @@ class HydraWallet:
 
 
     @classmethod
-    def get_wallet_address(cls,account=0,key=0):
+    def get_wallet_address(cls,account=0,key=0,network="devnet"):
         data = cls.load_wallets()
         if len(data) > 0:
             vault = data[account][0]
             _params = vault['plugins'][0]['parameters']
             data = json.dumps(vault)
             params = json.dumps(_params)
-            addr = iop.get_wallet(data,key)
+            addr = iop.get_wallet(data,key,network)
             return addr
     
 
@@ -146,8 +146,8 @@ class HydraWallet:
             return(did)
 
 
-    def recover_wallet(cls,password,phrase):
-        vault = cls.generate_wallet(password,phrase)
+    def recover_wallet(cls,password,phrase,network='devnet'):
+        vault = cls.generate_wallet(password,phrase,network)
         return vault
 
     @classmethod
@@ -176,7 +176,7 @@ class HydraWallet:
 
     def get_nonce(cls,key=0):
         addr = cls.get_wallet_address(key=key)
-        url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
@@ -186,22 +186,22 @@ class HydraWallet:
             print("Failed to fetch data. Status code:", response.status_code)   
 
             
-    def sign_transaction(cls,receiver,amount,password,account,key):
+    def sign_transaction(cls,receiver,amount,password,account,key,network):
         nonce = cls.get_nonce()
         vaults = cls.load_wallets()
         vault = vaults[account][0]
         _params = vault['plugins'][0]['parameters']
         data = json.dumps(vault)
         params = json.dumps(_params)
-        response = iop.generate_transaction(data,receiver,amount,nonce,password,key)
+        response = iop.generate_transaction(data,receiver,amount,nonce,password,key,network)
         signed_txs = json.loads(response)
         return signed_txs    
 
     #this function assumes that the wallet has made a transaction before
-    def send_transaction(self,receiver,amount,password,account=0,key=0):
+    def send_transaction(self,receiver,amount,password,account=0,key=0,network="devnet"):
         # Send a GET request to the URL
-        signed_txs = self.sign_transaction(receiver,amount,password,account,key)
-        url = "https://test.explorer.hydraledger.io:4705/api/v2/transactions"
+        signed_txs = self.sign_transaction(receiver,amount,password,account,key,network)
+        url = "https://dev.explorer.hydraledger.tech:4705/api/v2/transactions"
         res = requests.post(url, json=signed_txs)
         response = res.json()
         print(response)
@@ -209,7 +209,7 @@ class HydraWallet:
 
 
     def check_transaction(self,txhash):
-        url = f"https://test.explorer.hydraledger.io:4705/api/v2/transactions/{txhash}"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/transactions/{txhash}"
         res = requests.get(url)
         response = res.json()
         txid = response['data']['id']
@@ -224,7 +224,7 @@ class HydraWallet:
         addr = cls.get_wallet_address()
         if addr == None:
             return None
-        response = requests.get(f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}")
+        response = requests.get(f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}")
         if response.status_code == 200:
             data = response.json()
             balance = data['data']['balance']
@@ -237,7 +237,7 @@ class HydraWallet:
         addr = cls.get_wallet_address()
         if addr == None:
             return None
-        url = f"https://test.explorer.hydraledger.io:4705/api/v2/wallets/{addr}/transactions"
+        url = f"https://dev.explorer.hydraledger.tech:4705/api/v2/wallets/{addr}/transactions"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()  # Assuming the response is in JSON format
