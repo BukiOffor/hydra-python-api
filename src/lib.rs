@@ -317,7 +317,7 @@ fn iop_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_hyd_vault, m)?)?;
     m.add_function(wrap_pyfunction!(get_new_acc_on_vault, m)?)?;
     m.add_function(wrap_pyfunction!(validate_statement_with_did, m)?)?;
-   // m.add("VaultCouldNotBeUnwrapped", PanicException::new_err("VaultCouldNotBeUnwrapped") )?;
+
    
 
     Ok(())
