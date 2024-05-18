@@ -97,13 +97,13 @@ class HydraWallet:
             with open(cls.file_path, 'r') as file:
                 data = json.load(file)
                 data.append(vaults)
-            with open(home_directory+'/.hydra_wallet', 'w') as json_file:
+            with open(cls.file_path, 'w') as json_file:
                 json.dump(data, json_file,indent=2)
             return phrase
         except FileNotFoundError:
             myvault = []
             myvault.append(vaults)
-            f1 = os.open (home_directory+"/.hydra_wallet", os.O_CREAT, 0o700)
+            f1 = os.open (cls.file_path, os.O_CREAT, 0o700)
             os.close (f1)
             with open(home_directory+'/.hydra_wallet', 'a') as json_file:                
                 json.dump(myvault, json_file, indent=2)
