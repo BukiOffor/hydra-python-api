@@ -72,7 +72,7 @@ vault = iop.get_hyd_vault(phrase,password,network)
 statement = {
     "name":"Buki Offor",
     "street": "Brick City Estate",
-    "dob": "01/03/1996",
+    "dob": "01/03/1980",
     "city": "Abuja",
     "country": "Nigeria",
     "zipcode": "987554",
