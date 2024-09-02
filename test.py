@@ -1,22 +1,25 @@
 import iop_python as iop
 from api import hydra
-
-wallet = hydra.HydraWallet()
-
-
-c = wallet.get_new_acc_on_vault('password')
-print(c)
+import requests
+import json
 
 
-phrase = "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather sca"
-try:
-    wallet = iop.get_morpheus_vault(phrase,"pass")
-    print(wallet)
+mywallet = hydra.HydraWallet()
 
-except Exception as e:
-    if "VaultCouldNotBeUnwrapped" in str(e):
-        print("The vault could not be unwrapped.")
-    else:
-        print(f"A RuntimeError occurred: {e}")
-except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+
+
+phrase = "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather scan"
+wallet = iop.get_morpheus_vault(phrase,"pass")
+
+
+
+
+password="horse-staple-God"
+data = iop.get_hyd_vault(mainnet_phrase,password,"mainnet")
+wallet = iop.get_wallet(data,0,"mainnet")
+print(wallet) # hVKiVHyKFzsm2MdKR2NxBCs3K8EoKGz3Dq
+response = iop.generate_transaction(data,"hMU5sH5D91anf8WNKEvcF4pW7naeijffUB",50000000,2,password,0,"mainnet") # send 0.5
+url = "http://explorer.hydraledger.tech:4703/api/v2/transactions"
+res = requests.post(url, json=json.loads(response))
+response = res.json()
+print(response)
