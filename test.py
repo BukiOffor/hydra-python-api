@@ -10,7 +10,6 @@ mywallet = hydra.HydraWallet()
 
 phrase = "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather scan"
 wallet = iop.get_morpheus_vault(phrase,"pass")
-mainnet_phrase="effort alarm inject boss spin ramp barely evolve expand across hawk capital village traffic sure trap basic cross volume keep fantasy bulk diesel cool"
 
 
 
