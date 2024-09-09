@@ -254,7 +254,8 @@ pub fn generate_transaction<'a>(
     nonce: u64,
     password: String,
     account: i32,
-    network: &'a str
+    network: &'a str,
+    vendor_field: Option<String>
 ) -> PyResult<String> {
     let mut transactions = Vec::new();
     let signer = deserialize_hydra(data, password, account,network).unwrap();
@@ -264,7 +265,7 @@ pub fn generate_transaction<'a>(
     let optional = OptionalTransactionFields {
         amount,
         manual_fee: None,
-        vendor_field: None,
+        vendor_field,
     };
     let common_fields = CommonTransactionFields {
         network: &*network,
