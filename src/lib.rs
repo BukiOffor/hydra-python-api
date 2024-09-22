@@ -65,11 +65,6 @@ impl Display for Err {
 }
 impl Error for Err {}
 
-#[derive(Serialize, Debug)]
-struct SendTxnsReq<'a> {
-    transactions: Vec<&'a TransactionData>,
-}
-
 
 pub struct Network {
     network: Box< dyn HydNetwork<Suite=Secp256k1>>
