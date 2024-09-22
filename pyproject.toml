@@ -11,6 +11,10 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+description = "This Python library provides bindings to a Rust sdk, enabling seamless interaction with minor blockchain transactions on the hydraledger blockchain"
+readme = "README.md"
+keywords = ["blockchain", "hydralegeder", "crypto", "decentralized identity", "did"]
+
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
