@@ -94,7 +94,7 @@ impl FromStr for Network {
 #[allow(unused_variables)]
 pub fn get_hyd_vault(phrase: String, password: String, network: String) -> PyResult<String> {
     let mut vault =
-        Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
+        Vault::create(None, phrase, "", &password).expect("Vault could not be initialised");
     let network = network.parse::<Network>().unwrap().network;
     let params = hydra::Parameters::new(&*network, 0);
     hydra::Plugin::init(&mut vault, &password, &params).expect("plugin could not be initialised");
@@ -108,7 +108,7 @@ pub fn get_hyd_vault(phrase: String, password: String, network: String) -> PyRes
 #[allow(unused_variables)]
 pub fn get_morpheus_vault(phrase: String, password: String) -> Result<String, PyErr> {
     //let mut vault = Vault::create(None, phrase, &password, &password).expect("Vault could not be initialised");
-    let vault = Vault::create(None, phrase, &password, &password);
+    let vault = Vault::create(None, phrase, "", &password);
     match vault {
         Ok(mut vault) => {
             morpheus::Plugin::init(&mut vault, &password).unwrap();
@@ -255,7 +255,8 @@ pub fn generate_transaction<'a>(
     password: String,
     account: i32,
     network: &'a str,
-    vendor_field: Option<String>
+    vendor_field: Option<String>,
+    manual_fee: Option<u64>,
 ) -> PyResult<String> {
     let mut transactions = Vec::new();
     let signer = deserialize_hydra(data, password, account,network).unwrap();
@@ -264,7 +265,7 @@ pub fn generate_transaction<'a>(
     let nonce = nonce + 1;
     let optional = OptionalTransactionFields {
         amount,
-        manual_fee: None,
+        manual_fee,
         vendor_field,
     };
     let common_fields = CommonTransactionFields {

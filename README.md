@@ -88,8 +88,10 @@ receiver = "taQb8gfnetDt6KtRH3n11M3APMzrWiBhhg"
 amount = "100"
 nonce = 1
 key = 0
-network = "devnet"
-tx_data = iop.generate_transaction(vault,receiver,amount,nonce,password,key,network)
+network = "testnet"
+fee = 10000
+comment = "sending money"
+tx_data = iop.generate_transaction(vault,receiver,amount,nonce,password,key,network,comment,fee)
 ```
 
 - `verify_signed_statement`: Verifies the signature of a signed witness statement and returns a boolean indicating whether the signature is valid.
