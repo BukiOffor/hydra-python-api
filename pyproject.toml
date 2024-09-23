@@ -12,17 +12,20 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
 ]
 dynamic = ["version"]
-description = "This Python library provides bindings to a Rust sdk, enabling seamless interaction with minor blockchain transactions on the hydraledger blockchain"
 readme = "README.md"
-keywords = ["blockchain", "hydralegeder", "cryptography", "decentralized identity", "did"]
+keywords = ["blockchain", "hydralegeder", "cryptography", "bip39", "did"]
 authors = [
   {email = "ebuka2264@yahoo.com"},
   {name = "Ebuka Offor"}
 ]
 maintainers = [
   {name = "Buki", email = "ebuka2264@yahoo.com"},
-  {name=" Odurukwe Stella", email= "odurukwestella5@gmail.com"}
+  {name = " Odurukwe Stella", email = "odurukwestella5@gmail.com"}
 ]
+
+[project.urls]
+Homepage = "https://github.com/BukiOffor/hydra-python-api"
+Issues = "https://github.com/BukiOffor/hydra-python-api/issues"
 
 
 [tool.maturin]
