@@ -9,11 +9,20 @@ classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Development Status :: 5 - Production/Stable",
 ]
 dynamic = ["version"]
 description = "This Python library provides bindings to a Rust sdk, enabling seamless interaction with minor blockchain transactions on the hydraledger blockchain"
 readme = "README.md"
-keywords = ["blockchain", "hydralegeder", "crypto", "decentralized identity", "did"]
+keywords = ["blockchain", "hydralegeder", "cryptography", "decentralized identity", "did"]
+authors = [
+  {email = "ebuka2264@yahoo.com"},
+  {name = "Ebuka Offor"}
+]
+maintainers = [
+  {name = "Buki", email = "ebuka2264@yahoo.com"},
+  {name=" Odurukwe Stella", email= "odurukwestella5@gmail.com"}
+]
 
 
 [tool.maturin]

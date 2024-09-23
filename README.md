@@ -1,115 +1,214 @@
+# **Hydra-Python-API** 
+![Rust](./core/wHyd.jpg)
 
 
+A Python API for interacting with the Hydra-Ledger blockchain, built using **Rust** and **WASM** through **Maturin**.
 
-# Hydra-Python-API
-
-Building a python Api for hydra-ledger blockchain using Maturin and Rust wasm
-
-
-## Installation
-### Prerequisite
-
-* Rust
-* Maturin
-* Python > 3.8
-
-Enter the base directory of the project and activate the virtual environment with the following command and install the required python packages.
+## **Project Structure**
 
 ```bash
-source env/bin/activate
-pip install -r requirements.txt
+hydra-python-api
+├── Cargo.lock
+├── Cargo.toml
+├── pyproject.toml
+├── src
+│   ├── api.rs
+│   ├── lib.rs
+│   ├── types.rs
+│   └── main.rs
+├── scripts
+│   └── index.py
+├── core
+├── requirements.txt
+├── README.md
+└── Dockerfile
 ```
 
-To compile the code, you can run the following command. This command builds a python wheel for the rust code.
+## **Features**
+- **Fast and Safe:** Leveraging Rust's low-level control for optimal performance and memory safety to prevent vulnerabilities.
+- **Transaction Management:** Easily create and sign transactions on the Hydra-Ledger blockchain.
+- **Seamless Integration:** Designed for easy integration into Python-based blockchain projects with minimal setup.
+- **Error Handling:** Graceful management of transaction failures with Python exceptions propagated from the Rust layer.
+
+---
+
+## **Building From Source**
+
+### Prerequisites
+- **Rust**
+- **Maturin**
+- **Python 3.8+**
+
+### Steps to Build
+
+1. Enter the project base directory and activate the virtual environment:
+   ```bash
+   source env/bin/activate
+   ```
+2. Install the required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Build the Python wheel for the Rust code:
+   ```bash
+   maturin develop
+   ```
+
+---
+
+## **Installation**
+
+Alternatively, install the package directly from `pip`:
+
 ```bash
-maturin develop
+pip install iop-python
 ```
 
-## Usage
+---
 
-This code snippet contains a python wrapper over several Rust functions that interact with the IOP SDK and perform various operations related to the IOP blockchain. Here is a brief description of some function:
+## **Usage**
+
+This API provides a Python wrapper over several Rust functions that interact with the IOP SDK to manage operations on the Hydra-Ledger blockchain.
+
+### **Initializing the SDK**
 
 ```python
-import iop_python as iop
+import iop_python as sdk
+iop = sdk.IopPython()
 ```
 
-- `get_hyd_vault`: Initializes a Hydra vault and returns the admin information as a JSON string.
+### **Examples of Available Methods**
+
+#### **1. `get_hyd_vault`**  
+Initializes a Hydra vault and returns account information as a JSON string. This information includes an encrypted seed and derived public key
+
 ```python
+phrase = "blind market ability shoot topple..."
 password = "horse-staple-battery"
 network = "devnet"
-hyd_vault = iop.get_hyd_vault(phrase,password,network)
+account = 0
+hyd_vault = iop.get_hyd_vault(phrase, password, network, account)
 ```
-- `get_morpheus_vault`: Initializes a Morpheus vault and returns the admin information as a JSON string.
+
+#### **2. `get_morpheus_vault`**  
+Initializes a Morpheus vault and returns admin information as a JSON string.
+
 ```python
+phrase = "blind market ability shoot topple..."
 password = "horse-staple-battery"
-morpheus_vault = iop.get_morpheus_vault(phrase,password)
+morpheus_vault = iop.get_morpheus_vault(phrase, password)
 ```
-- `generate_nonce`: Generates a random nonce and returns it as a string.
+
+#### **3. `generate_nonce`**  
+Generates a random nonce and returns it as a string.
+
 ```python
-phrase = iop.generate_nonce()
+nonce = iop.generate_nonce()
 print(nonce)
 >>> "uVIc9J4UjKx8tRs6HUEDQElksBCtF9VnHb439boVmB9cw"
 ```
-- `generate_phrase`: Generates a random mnemonic phrase and returns it as a string.
+
+#### **4. `generate_phrase`**  
+Generates a random mnemonic phrase and returns it as a string.
+
 ```python
 phrase = iop.generate_phrase()
 print(phrase)
->>> "blind market ability shoot topple round inmate pass lunch symbol average alpha party notice switch sea pass toy alien fuel pull angle weather scan"
+>>> "blind market ability shoot topple..."
 ```
-- `generate_did_by_morpheus`: Generates a DID (Decentralized Identifier) using a Morpheus vault and returns it as a string.
- ```python
+
+#### **5. `generate_did_by_morpheus`**  
+Generates a Decentralized Identifier (DID) using a Morpheus vault.
+
+```python
 password = "horse-staple-battery"
-morpheus_vault = iop.get_morpheus_vault(phrase,password)
-did = iop.generate_did_by_morpheus(morpheus_vault)
+idx = 0
+morpheus_vault = iop.get_morpheus_vault(phrase, password)
+did = iop.generate_did_by_morpheus(morpheus_vault, password, idx)
 print(did)
 >>> did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr
- ```
-- `sign_witness_statement`: Signs a witness statement using a Morpheus vault and returns the signed statement as a JSON string.
+```
+
+#### **6. `sign_witness_statement`**  
+Signs a witness statement using a Hydra vault.
+
 ```python
-# network can be mainnet, devnet or testnet
 network = "devnet"
-vault = iop.get_hyd_vault(phrase,password,network)
+account = 0
+idx = 0
+vault = iop.get_hyd_vault(phrase, password, network, account)
+
 statement = {
-    "name":"Buki Offor",
+    "name": "Buki Offor",
     "street": "Brick City Estate",
     "dob": "01/03/1980",
     "city": "Abuja",
     "country": "Nigeria",
     "zipcode": "987554",
-
 }
-signed_witness_statement = iop.sign_witness_statement(vault,statement,password)
-print(json.loads(signed_witness_statement))
+
+signed_statement = iop.sign_witness_statement(vault, password, statement, idx)
+print(json.loads(signed_statement))
 ```
-- `generate_transaction`: Builds a transaction to transfer a certain amount of tokens to a specified recipient using a Hydra vault and returns the transaction data as a JSON string. This transaction data can be sent to a node to validate and perform the transaction. 
+
+#### **7. `generate_transaction`**  
+Builds a transaction to transfer tokens using a Hydra vault.
 
 ```python
 receiver = "taQb8gfnetDt6KtRH3n11M3APMzrWiBhhg"
 amount = "100"
 nonce = 1
-key = 0
+account = 0
+idx = 0
 network = "testnet"
 fee = 10000
 comment = "sending money"
-tx_data = iop.generate_transaction(vault,receiver,amount,nonce,password,key,network,comment,fee)
+
+tx_data = iop.generate_transaction(vault, receiver, amount, nonce, password, account, idx, network, comment, fee)
 ```
 
-- `verify_signed_statement`: Verifies the signature of a signed witness statement and returns a boolean indicating whether the signature is valid.
+#### **8. `verify_signed_statement`**  
+Verifies the signature of a signed witness statement.
 
 ```python
-chain = HydraChain()
-signed_statement =  {
-    "signature": "00987890098776556667788976676787655"
+signed_statement = {
+    "signature": "00987890098776556667788976676787655",
     "claim": {
-    "subject": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
-    "content": {}...},    
+        "subject": "did:morpheus:ezbeWGSY2dqcUBqT8K7R14xr",
+        "content": {}
     }
-result = chain.verify_signed_statement(signed_statement)
+}
+result = iop.verify_signed_statement(signed_statement)
 print(result)
 >>> True
 ```
-- `validate_statement_with_did`: Validates a signed witness statement using a DID document and returns the validation result as a JSON string.
-- `sign_did_statement`: Signs a data payload using a Morpheus vault and returns the signed data and the corresponding public key as strings.
+
+#### **9. `validate_statement_with_did`**  
+Validates a signed witness statement using a DID document.
+
+#### **10. `sign_did_statement`**  
+Signs a data payload using a Morpheus vault, returning the signed data and corresponding public key.
+
+---
+
+# **Exceptions**
+You can catch exceptions and log helpful messages during debugging.
+```python
+import iop_python as sdk
+iop = sdk.IopPython()
+
+try:
+    phrase = iop.generate_phrase()
+    vault = iop.get_hyd_vault(phrase, "password",'mainnet',0)
+    address = iop.get_wallet_address(vault,9,0,'mainnet')
+    print(address)
+except Exception as err:
+    if type(err).__name__ == 'PyIopError':
+        print(err.args[0].message)
+    else:
+        print(err)
+```
 
 
-These functions are intended to be used as Python module functions and can be imported and called from Python code.
+
+These functions are intended to be used as Python module functions and can be easily integrated into your Hydra-Ledger blockchain projects.

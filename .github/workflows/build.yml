@@ -1,25 +1,33 @@
+name: Rust
 
-name: Build
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  # Build job. Builds app for Android with Buildozer
-  build-android:
-    name: Build for Android
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Buildozer action
-        uses: ArtemSBulgakov/buildozer-action@v1.1.3  
-        id: buildozer
-        with:
-          buildozer_version: stable
+    - name: Install dependencies
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+        rustc --version
+        cargo --version
+        sudo apt-get install python3 python3-pip
+        pip install maturin
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: package
-          path: ${{ steps.buildozer.outputs.filename }}
+
+    - name: Build Python package
+      run: maturin build --release --strip --manylinux off
+
