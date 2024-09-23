@@ -1,5 +1,5 @@
 # **Hydra-Python-API** 
-![Rust](./core/wHyd.jpg)
+![Rust](./core/wHyd.png)
 
 
 A Python API for interacting with the Hydra-Ledger blockchain, built using **Rust** and **WASM** through **Maturin**.
