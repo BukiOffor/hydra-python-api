@@ -50,7 +50,7 @@ impl IopPython {
         vendor_field: Option<String>,
         manual_fee: Option<u64>,
     ) -> PyResult<String> {
-        match self.sdk.generate_transaction(
+        match self.sdk.sign_transaction(
             data,
             receiver,
             amount,

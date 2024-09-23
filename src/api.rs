@@ -62,7 +62,7 @@ impl IopSdk {
         Ok(wallet_address)
     }
 
-    pub fn generate_transaction<'a>(
+    pub fn sign_transaction<'a>(
         &self,
         data: String,
         receiver: String,
