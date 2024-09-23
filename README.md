@@ -151,7 +151,7 @@ signed_statement = iop.sign_witness_statement(vault, password, statement, idx)
 print(json.loads(signed_statement))
 ```
 
-#### **7. `generate_transaction`**  
+#### **7. `sign_transaction`**  
 Builds a transaction to transfer tokens using a Hydra vault.
 
 ```python
@@ -164,7 +164,7 @@ network = "testnet"
 fee = 10000
 comment = "sending money"
 
-tx_data = iop.generate_transaction(vault, receiver, amount, nonce, password, account, idx, network, comment, fee)
+tx_data = iop.sign_transaction(vault, receiver, amount, nonce, password, account, idx, network, comment, fee)
 ```
 
 #### **8. `verify_signed_statement`**  
