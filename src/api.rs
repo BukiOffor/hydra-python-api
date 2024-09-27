@@ -117,10 +117,8 @@ impl IopSdk {
         network: String,
         account: i32,
     ) -> Result<String, IopError> {
-        let mut vault = match Vault::create(None, phrase, "", &password) {
-            Ok(vault) => vault,
-            Err(_err) => return Err(IopError::CouldNotCreateHydVault),
-        };
+        let mut vault =  Vault::create(None, phrase, "", &password)
+            .or(Err(IopError::CouldNotCreateHydVault))?;
         let network = match network.parse::<Network>() {
             Ok(network) => network.network,
             Err(_err) => return Err(IopError::CouldNotMatchNetwork),
