@@ -1,8 +1,11 @@
 mod api;
 mod types;
 
+use std::str::FromStr;
+
 use crate::api::IopSdk;
 use crate::types::{map_error, PyIopErrorPayload};
+use iop_sdk::ciphersuite::secp256k1::SecpPublicKey;
 use pyo3::prelude::*;
 
 #[pyclass]
@@ -164,6 +167,89 @@ impl IopPython {
     /// validate a statement with did
     fn validate_statement_with_did(&self, data: &str, doc: &str) -> PyResult<String> {
         match self.sdk.validate_statement_with_did(data, doc) {
+            Ok(response) => Ok(response),
+            Err(err) => Err(map_error(err)),
+        }
+    }
+    fn vote<'a>(
+        &self,
+        data: String,
+        nonce: u64,
+        password: String,
+        account: i32,
+        idx: i32,
+        network: &'a str,
+        delegate: String,
+        vendor_field: Option<String>,
+        manual_fee: Option<u64>,
+    ) -> PyResult<String> {
+        match self.sdk.vote(
+            data,
+            nonce,
+            password,
+            account,
+            idx,
+            network,
+            &SecpPublicKey::from_str(delegate.as_str()).unwrap(), // delegate
+            vendor_field,
+            manual_fee,
+        ) {
+            Ok(response) => Ok(response),
+            Err(err) => Err(map_error(err)),
+        }
+    }
+
+    fn unvote<'a>(
+        &self,
+        data: String,
+        nonce: u64,
+        password: String,
+        account: i32,
+        idx: i32,
+        network: &'a str,
+        delegate: String,
+        vendor_field: Option<String>,
+        manual_fee: Option<u64>,
+    ) -> PyResult<String> {
+        let delegate = SecpPublicKey::from_str(delegate.as_str()).unwrap();
+        match self.sdk.unvote(
+            data,
+            nonce,
+            password,
+            account,
+            idx,
+            network,
+            &delegate,
+            vendor_field,
+            manual_fee,
+        ) {
+            Ok(response) => Ok(response),
+            Err(err) => Err(map_error(err)),
+        }
+    }
+    fn register_delegate<'a>(
+        &self,
+        data: String,
+        nonce: u64,
+        password: String,
+        account: i32,
+        idx: i32,
+        network: &'a str,
+        delegate: String,
+        vendor_field: Option<String>,
+        manual_fee: Option<u64>,
+    ) -> PyResult<String> {
+        match self.sdk.register_delegate(
+            data,
+            nonce,
+            password,
+            account,
+            idx,
+            network,
+            &delegate,
+            vendor_field,
+            manual_fee,
+        ) {
             Ok(response) => Ok(response),
             Err(err) => Err(map_error(err)),
         }

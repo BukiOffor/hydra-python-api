@@ -117,8 +117,8 @@ impl IopSdk {
         network: String,
         account: i32,
     ) -> Result<String, IopError> {
-        let mut vault =  Vault::create(None, phrase, "", &password)
-            .or(Err(IopError::CouldNotCreateHydVault))?;
+        let mut vault =
+            Vault::create(None, phrase, "", &password).or(Err(IopError::CouldNotCreateHydVault))?;
         let network = match network.parse::<Network>() {
             Ok(network) => network.network,
             Err(_err) => return Err(IopError::CouldNotMatchNetwork),
@@ -337,6 +337,108 @@ impl IopSdk {
             Err(_) => return Err(IopError::CouldNotValidateDidStatement),
         };
         let data = serde_json::to_string(&response).unwrap();
+        Ok(data)
+    }
+
+    pub fn vote<'a>(
+        &self,
+        data: String,
+        nonce: u64,
+        password: String,
+        account: i32,
+        idx: i32,
+        network: &'a str,
+        delegate: &SecpPublicKey,
+        vendor_field: Option<String>,
+        manual_fee: Option<u64>,
+    ) -> Result<String, IopError> {
+        let mut transactions = Vec::new();
+        let signer = self.deserialize_hydra(data, password, account, idx, network)?;
+        let network = network.parse::<Network>().unwrap().network;
+        let nonce = nonce + 1;
+        let common_fields = CommonTransactionFields {
+            network: &*network,
+            sender_public_key: signer.1,
+            nonce,
+            optional: OptionalTransactionFields {
+                vendor_field,
+                manual_fee,
+                ..Default::default()
+            },
+        };
+        let value = Transaction::vote(common_fields, delegate);
+        let mut signed = value.to_data();
+        signer.0.sign_hydra_transaction(&mut signed).unwrap();
+        transactions.push(signed);
+        let data = serde_json::to_string(&Transactions { transactions }).unwrap();
+        Ok(data)
+    }
+
+    pub fn unvote<'a>(
+        &self,
+        data: String,
+        nonce: u64,
+        password: String,
+        account: i32,
+        idx: i32,
+        network: &'a str,
+        delegate: &SecpPublicKey,
+        vendor_field: Option<String>,
+        manual_fee: Option<u64>,
+    ) -> Result<String, IopError> {
+        let mut transactions = Vec::new();
+        let signer = self.deserialize_hydra(data, password, account, idx, network)?;
+        let network = network.parse::<Network>().unwrap().network;
+        let nonce = nonce + 1;
+        let common_fields = CommonTransactionFields {
+            network: &*network,
+            sender_public_key: signer.1,
+            nonce,
+            optional: OptionalTransactionFields {
+                vendor_field,
+                manual_fee,
+                ..Default::default()
+            },
+        };
+        let value = Transaction::unvote(common_fields, delegate);
+        let mut signed = value.to_data();
+        signer.0.sign_hydra_transaction(&mut signed).unwrap();
+        transactions.push(signed);
+        let data = serde_json::to_string(&Transactions { transactions }).unwrap();
+        Ok(data)
+    }
+
+    pub fn register_delegate<'a>(
+        &self,
+        data: String,
+        nonce: u64,
+        password: String,
+        account: i32,
+        idx: i32,
+        network: &'a str,
+        delegate: &'a str,
+        vendor_field: Option<String>,
+        manual_fee: Option<u64>,
+    ) -> Result<String, IopError> {
+        let mut transactions = Vec::new();
+        let signer = self.deserialize_hydra(data, password, account, idx, network)?;
+        let network = network.parse::<Network>().unwrap().network;
+        let nonce = nonce + 1;
+        let common_fields = CommonTransactionFields {
+            network: &*network,
+            sender_public_key: signer.1,
+            nonce,
+            optional: OptionalTransactionFields {
+                vendor_field,
+                manual_fee,
+                ..Default::default()
+            },
+        };
+        let value = Transaction::register_delegate(common_fields, delegate);
+        let mut signed = value.to_data();
+        signer.0.sign_hydra_transaction(&mut signed).unwrap();
+        transactions.push(signed);
+        let data = serde_json::to_string(&Transactions { transactions }).unwrap();
         Ok(data)
     }
 }
