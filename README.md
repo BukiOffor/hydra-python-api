@@ -189,6 +189,38 @@ Validates a signed witness statement using a DID document.
 #### **10. `sign_did_statement`**  
 Signs a data payload using a Morpheus vault, returning the signed data and corresponding public key.
 
+#### **11. `vote`**
+Creates a vote transaction that empowers a delegate SecpPublicKey to validate blocks and earn rewards for doing so.
+```python
+nonce = 30
+phrase = iop.generate_phrase()
+vault = iop.get_hyd_vault(phrase, password,'mainnet',0)
+vote = iop.vote(vault,nonce,password,0,0,'mainnet','039682767ffe835da2887c0fb948d32627af2e10c07c5c0cfc6b6162fc3ad2d914')
+print(vote)
+>>> {"transactions":[{"version":2,"network":100,"typeGroup":1,"type":3,"asset":{"votes":["+039682767ffe835da2887c0fb948d32627af2e10c07c5c0cfc6b6162fc3ad2d914"]},"nonce":"31","senderPublicKey":"02fe94408f81dec1f7172c4427b0a023b0973ce8e3dfb326352834c84ece2a46c1","fee":"100000000","amount":"0","id":"6701fd63af8f4d6216d9e9dcb43dd570eabbaae4e04158f6716f8aaae6a5c7c0","signature":"3045022100f08554468648dbe09f58a402957c63b7cc48a8c5be584f8cf08047495eec6be102206d4e5851832dcb142dcc558b824e0f7b6b33bf8e29caa76c7812324857d9a288"}]}
+```
+
+#### **12. `unvote`**
+Creates an unvote transaction that revokes empowerment from a delegate {@SecpPublicKey} to validate blocks.
+```python
+nonce = 31
+phrase = iop.generate_phrase()
+vault = iop.get_hyd_vault(phrase, password,'mainnet',0)
+unvote = iop.unvote(vault,nonce,password,0,0,'mainnet','039682767ffe835da2887c0fb948d32627af2e10c07c5c0cfc6b6162fc3ad2d914')
+print(unvote)
+>>> {"transactions":[{"version":2,"network":100,"typeGroup":1,"type":3,"asset":{"votes":["-039682767ffe835da2887c0fb948d32627af2e10c07c5c0cfc6b6162fc3ad2d914"]},"nonce":"32","senderPublicKey":"02fe94408f81dec1f7172c4427b0a023b0973ce8e3dfb326352834c84ece2a46c1","fee":"100000000","amount":"0","id":"f1171d41af02681f6a938e14ef5cab00436c05d75fdb89f131d7e521975c8520","signature":"304402200a8ce3b1ce634ed1262e1d3c2269c8a196cfa46860e6a2b4ff7ae7ffddea71be022043db63fa8ff8084e3f59caaf9b5571de96d4da0e8ec107dddba2b13be1df17c5"}]}
+```
+
+#### **13. `register_delegate`**
+Creates a transaction that registers a delegate so it can validate blocks and earn rewards for doing so. If there is not enough balance on the delegate's address, other addresses can vote for the delegate with their own balance and if the sum of these are in the top 53 (or the limit on the actual network), they can validate blocks in the coming rounds.
+```python
+nonce = 32
+phrase = iop.generate_phrase()
+vault = iop.get_hyd_vault(phrase, password,'mainnet',0)
+response = iop.register_delegate(vault,nonce,password,0,0,'mainnet','buki_the_goat')
+print(response)
+>>> {"transactions":[{"version":2,"network":100,"typeGroup":1,"type":2,"asset":{"delegate":{"username":"buki_the_goat"}},"nonce":"33","senderPublicKey":"02fe94408f81dec1f7172c4427b0a023b0973ce8e3dfb326352834c84ece2a46c1","fee":"2500000000","amount":"0","id":"7f86c2ff316cb53d16394c6aae5125f2ebf9eb6d991e593d1628fc805c6fa6ac","signature":"3045022100e069a70f977374311bf46c97b0eee26964d314dabda75e574bfe280746731fce02204e9da37c6e83db42b62253ad33d925aac324368ecc8d84df47c8ce49ea193505"}]}
+```
 ---
 
 # **Exceptions**

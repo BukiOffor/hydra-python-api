@@ -190,7 +190,7 @@ impl IopPython {
             account,
             idx,
             network,
-            &SecpPublicKey::from_str(delegate.as_str()).unwrap(), // delegate
+            delegate,
             vendor_field,
             manual_fee,
         ) {

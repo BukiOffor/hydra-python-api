@@ -348,7 +348,7 @@ impl IopSdk {
         account: i32,
         idx: i32,
         network: &'a str,
-        delegate: &SecpPublicKey,
+        delegate: String,
         vendor_field: Option<String>,
         manual_fee: Option<u64>,
     ) -> Result<String, IopError> {
@@ -366,6 +366,7 @@ impl IopSdk {
                 ..Default::default()
             },
         };
+        let delegate = &SecpPublicKey::from_str(delegate.as_str()).or(Err(IopError::CouldNotValidatePublicKey))?;
         let value = Transaction::vote(common_fields, delegate);
         let mut signed = value.to_data();
         signer.0.sign_hydra_transaction(&mut signed).unwrap();

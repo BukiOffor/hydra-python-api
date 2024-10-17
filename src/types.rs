@@ -30,6 +30,7 @@ pub enum IopError {
     CouldNotGetHydVault,
     CouldNotGetHydPublicKey,
     CouldNotValidateDidStatement,
+    CouldNotValidatePublicKey,
 }
 
 impl std::error::Error for IopError {}
@@ -66,6 +67,7 @@ impl IopError {
             IopError::CouldNotGetHydVault => "could not parse parameter, is account correct ?",
             IopError::CouldNotGetHydPublicKey => "could not get public key, is idx correct ?",
             IopError::CouldNotValidateDidStatement => "could not validate did statement",
+            Self::CouldNotValidatePublicKey => "could not validate the public key, is public key correct ?"
         }
     }
 }
