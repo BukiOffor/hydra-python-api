@@ -1,10 +1,13 @@
 [build-system]
-requires = ["maturin>=1.3,<2.0"]
+requires = ["maturin>=1.4,<2.0"]
 build-backend = "maturin"
 
 [project]
 name = "iop-python"
 requires-python = ">=3.8"
+dependencies = [
+    "kivy>=2.0.0"
+]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -12,21 +15,12 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
 ]
 dynamic = ["version"]
-readme = "README.md"
-keywords = ["blockchain", "hydralegeder", "cryptography", "bip39", "did"]
-authors = [
-  {email = "ebuka2264@yahoo.com"},
-  {name = "Ebuka Offor"}
-]
-maintainers = [
-  {name = "Buki", email = "ebuka2264@yahoo.com"},
-  {name = " Odurukwe Stella", email = "odurukwestella5@gmail.com"}
-]
-
-[project.urls]
-Homepage = "https://github.com/BukiOffor/hydra-python-api"
-Issues = "https://github.com/BukiOffor/hydra-python-api/issues"
-
 
 [tool.maturin]
+python-source = "."
+module-name = "iop_python"
 features = ["pyo3/extension-module"]
+targets = ["aarch64-linux-android", "armv7-linux-androideabi", "i686-linux-android", "x86_64-linux-android"]
+
+[package.metadata.maturin]
+android-platform-level = 21
