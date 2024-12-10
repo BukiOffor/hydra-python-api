@@ -20,7 +20,13 @@ dynamic = ["version"]
 python-source = "."
 module-name = "iop_python"
 features = ["pyo3/extension-module"]
-targets = ["aarch64-linux-android", "armv7-linux-androideabi", "i686-linux-android", "x86_64-linux-android"]
+
+[tool.maturin.targets]
+aarch64-linux-android = {}
+armv7-linux-androideabi = {}
+i686-linux-android = {}
+x86_64-linux-android = {}
+
 
 [package.metadata.maturin]
 android-platform-level = 21
